@@ -6,6 +6,7 @@
 #include <imx6qdl-aristainetos2-u-boot.dtsi>
 / {
 	chosen {
+		u-boot,dm-pre-reloc;
 		stdout-path = &uart2;
 	};
 
@@ -34,4 +35,24 @@
 
 &panel0 {
 	power-supply = <&vdd_panel_reg>;
+};
+
+&uart2 {
+	u-boot,dm-pre-reloc;
+};
+
+&pinctrl_gpio {
+	u-boot,dm-pre-reloc;
+};
+
+&pinctrl_uart2 {
+	u-boot,dm-pre-reloc;
+};
+
+&iomuxc {
+	u-boot,dm-pre-reloc;
+};
+
+&aips2 {
+	u-boot,dm-pre-reloc;
 };

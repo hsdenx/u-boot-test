@@ -140,15 +140,6 @@ int board_mmc_init(bd_t *bis)
 }
 #endif
 
-/*
- * Do not overwrite the console
- * Use always serial for U-Boot console
- */
-int overwrite_console(void)
-{
-	return 1;
-}
-
 struct display_info_t const displays[] = {
 	{
 		.bus	= -1,
@@ -321,3 +312,18 @@ int board_ehci_power(int port, int on)
 	return 0;
 }
 #endif
+
+int board_fit_config_name_match(const char *name)
+{
+	char *boardtype;
+
+	boardtype = env_get("board_type");
+	if (!strcmp(name, "imx6dl-aristainetos2_4"))
+		if (!strcmp(boardtype, "aristainetos2_4"))
+			return 0;
+	if (!strcmp(name, "imx6dl-aristainetos2_7"))
+		if (!strcmp(boardtype, "aristainetos2_7"))
+			return 0;
+
+	return -1;
+}
