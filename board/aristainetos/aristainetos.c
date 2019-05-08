@@ -39,9 +39,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define ENET_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
 	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS)
 
-#define SPI_PAD_CTRL (PAD_CTL_HYS | PAD_CTL_SPEED_MED | \
-		      PAD_CTL_DSE_40ohm | PAD_CTL_SRE_FAST)
-
 #define I2C_PAD_CTRL	(PAD_CTL_PUS_100K_UP |			\
 	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
 	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
@@ -49,8 +46,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define PC MUX_PAD_CTRL(I2C_PAD_CTRL)
 
 #define DISP_PAD_CTRL	(0x10)
-
-#define ECSPI4_CS1		IMX_GPIO_NR(5, 2)
 
 #if ((CONFIG_SYS_BOARD_VERSION == 2) || (CONFIG_SYS_BOARD_VERSION == 3))
 #include "./aristainetos-v2.c"
@@ -226,8 +221,6 @@ int board_init(void)
 	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
 #endif
 
-	setup_spi();
-
 	setup_i2c(0, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
 		  &i2c_pad_info1);
 	setup_i2c(1, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
@@ -243,7 +236,6 @@ int board_init(void)
 
 	setup_board_gpio();
 	setup_gpmi_nand();
-	setup_board_spi();
 
 	/* GPIO_1 for USB_OTG_ID */
 	clrsetbits_le32(&iomux->gpr[1], IOMUXC_GPR1_USB_OTG_ID_SEL_MASK, 0);

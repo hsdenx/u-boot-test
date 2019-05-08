@@ -30,7 +30,6 @@
 #include <asm/arch/sys_proto.h>
 #include <pwm.h>
 #include <micrel.h>
-#include <spi.h>
 #include <video.h>
 #include <../drivers/video/imx/ipu.h>
 #if defined(CONFIG_VIDEO_BMP_LOGO)
@@ -112,32 +111,10 @@ static iomux_v3_cfg_t const backlight_pads[] = {
 	MX6_PAD_NANDF_CS2__GPIO6_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
 };
 
-static iomux_v3_cfg_t const ecspi1_pads[] = {
-	MX6_PAD_EIM_D16__ECSPI1_SCLK | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_EIM_D17__ECSPI1_MISO | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_EIM_D18__ECSPI1_MOSI | MUX_PAD_CTRL(SPI_PAD_CTRL),
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-	MX6_PAD_KEY_ROW1__GPIO4_IO09 | MUX_PAD_CTRL(SPI_PAD_CTRL),
-#elif (CONFIG_SYS_BOARD_VERSION == 3)
-	MX6_PAD_EIM_EB2__GPIO2_IO30  | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	MX6_PAD_KEY_COL2__GPIO4_IO10 | MUX_PAD_CTRL(NO_PAD_CTRL),
-#endif
-};
-
 static void setup_iomux_enet(void)
 {
 	imx_iomux_v3_setup_multiple_pads(enet_pads, ARRAY_SIZE(enet_pads));
 }
-
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-iomux_v3_cfg_t const ecspi4_pads[] = {
-	MX6_PAD_EIM_D21__ECSPI4_SCLK | MUX_PAD_CTRL(NO_PAD_CTRL),
-	MX6_PAD_EIM_D22__ECSPI4_MISO | MUX_PAD_CTRL(NO_PAD_CTRL),
-	MX6_PAD_EIM_D28__ECSPI4_MOSI | MUX_PAD_CTRL(NO_PAD_CTRL),
-	MX6_PAD_EIM_A25__GPIO5_IO02  | MUX_PAD_CTRL(NO_PAD_CTRL),
-	MX6_PAD_EIM_D29__GPIO3_IO29  | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-#endif
 
 static iomux_v3_cfg_t const display_pads[] = {
 	MX6_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK | MUX_PAD_CTRL(DISP_PAD_CTRL),
@@ -169,50 +146,6 @@ static iomux_v3_cfg_t const display_pads[] = {
 	MX6_PAD_DISP0_DAT22__IPU1_DISP0_DATA22,
 	MX6_PAD_DISP0_DAT23__IPU1_DISP0_DATA23,
 };
-
-int board_spi_cs_gpio(unsigned bus, unsigned cs)
-{
-	if (bus == CONFIG_SF_DEFAULT_BUS && cs == CONFIG_SF_DEFAULT_CS)
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-		return IMX_GPIO_NR(5, 2);
-
-	if (bus == 0 && cs == 0)
-		return IMX_GPIO_NR(4, 9);
-#elif (CONFIG_SYS_BOARD_VERSION == 3)
-		return ECSPI1_CS0;
-
-	if (bus == 0 && cs == 1)
-		return ECSPI1_CS1;
-#endif
-	return -1;
-}
-
-static void setup_spi(void)
-{
-	int i;
-
-	imx_iomux_v3_setup_multiple_pads(ecspi1_pads, ARRAY_SIZE(ecspi1_pads));
-
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-	imx_iomux_v3_setup_multiple_pads(ecspi4_pads, ARRAY_SIZE(ecspi4_pads));
-#endif
-
-	for (i = 0; i < 4; i++)
-		enable_spi_clk(true, i);
-
-	gpio_request(ECSPI1_CS0, "spi1_cs0");
-	gpio_direction_output(ECSPI1_CS0, 1);
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-	gpio_request(ECSPI4_CS1, "spi4_cs1");
-	gpio_direction_output(ECSPI4_CS1, 0);
-	/* set cs0 to high (second device on spi bus #4) */
-	gpio_request(ECSPI4_CS0, "spi4_cs0");
-	gpio_direction_output(ECSPI4_CS0, 1);
-#elif (CONFIG_SYS_BOARD_VERSION == 3)
-	gpio_request(ECSPI1_CS1, "spi1_cs1");
-	gpio_direction_output(ECSPI1_CS1, 1);
-#endif
-}
 
 int board_phy_config(struct phy_device *phydev)
 {
@@ -555,13 +488,6 @@ static void setup_board_gpio(void)
 	gpio_request(IMX_GPIO_NR(2, 29), "LED blue"); /* 61 */
 	gpio_direction_output(IMX_GPIO_NR(2, 29), 0);
 #endif
-}
-
-static void setup_board_spi(void)
-{
-	/* enable spi bus #2 SS drivers (and spi bus #4 SS1 for rev2b) */
-	gpio_request(IMX_GPIO_NR(6, 6), "spi_ena");
-	gpio_direction_output(IMX_GPIO_NR(6, 6), 1);
 }
 
 int board_late_init(void)
