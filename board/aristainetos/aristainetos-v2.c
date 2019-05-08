@@ -76,43 +76,6 @@ struct i2c_pads_info i2c_pad_info4 = {
 	}
 };
 
-iomux_v3_cfg_t const gpio_pads[] = {
-	/* LED enable*/
-	MX6_PAD_ENET_CRS_DV__GPIO1_IO25 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* LED yellow */
-	MX6_PAD_NANDF_CS3__GPIO6_IO16 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* LED red */
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-	MX6_PAD_EIM_EB0__GPIO2_IO28 | MUX_PAD_CTRL(NO_PAD_CTRL),
-#elif (CONFIG_SYS_BOARD_VERSION == 3)
-	MX6_PAD_EIM_WAIT__GPIO5_IO00 | MUX_PAD_CTRL(NO_PAD_CTRL),
-#endif
-	/* LED green */
-	MX6_PAD_EIM_A24__GPIO5_IO04 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* LED blue */
-	MX6_PAD_EIM_EB1__GPIO2_IO29 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* spi flash WP protect */
-	MX6_PAD_SD4_DAT7__GPIO2_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* spi CS 0 */
-	MX6_PAD_EIM_D29__GPIO3_IO29 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* spi bus #2 SS driver enable */
-	MX6_PAD_EIM_A23__GPIO6_IO06 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* RST_LOC# PHY reset input (has pull-down!)*/
-	MX6_PAD_GPIO_18__GPIO7_IO13 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* SD 2 level shifter output enable */
-	MX6_PAD_SD3_RST__GPIO7_IO08 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* SD1 card detect input */
-	MX6_PAD_ENET_RXD0__GPIO1_IO27 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* SD1 write protect input */
-	MX6_PAD_DI0_PIN4__GPIO4_IO20 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* SD2 card detect input */
-	MX6_PAD_GPIO_19__GPIO4_IO05 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* SD2 write protect input */
-	MX6_PAD_SD4_DAT2__GPIO2_IO10 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* Touchscreen IRQ */
-	MX6_PAD_SD4_DAT1__GPIO2_IO09 | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-
 static iomux_v3_cfg_t const misc_pads[] = {
 	/* USB_OTG_ID = GPIO1_24*/
 	MX6_PAD_ENET_RX_ER__USB_OTG_ID		| MUX_PAD_CTRL(NO_PAD_CTRL),
@@ -237,12 +200,16 @@ static void setup_spi(void)
 	for (i = 0; i < 4; i++)
 		enable_spi_clk(true, i);
 
+	gpio_request(ECSPI1_CS0, "spi1_cs0");
 	gpio_direction_output(ECSPI1_CS0, 1);
 #if (CONFIG_SYS_BOARD_VERSION == 2)
+	gpio_request(ECSPI4_CS1, "spi4_cs1");
 	gpio_direction_output(ECSPI4_CS1, 0);
 	/* set cs0 to high (second device on spi bus #4) */
+	gpio_request(ECSPI4_CS0, "spi4_cs0");
 	gpio_direction_output(ECSPI4_CS0, 1);
 #elif (CONFIG_SYS_BOARD_VERSION == 3)
+	gpio_request(ECSPI1_CS1, "spi1_cs1");
 	gpio_direction_output(ECSPI1_CS1, 1);
 #endif
 }
@@ -331,9 +298,13 @@ static void enable_display_power(void)
 					 ARRAY_SIZE(backlight_pads));
 
 	/* backlight enable */
+	gpio_request(IMX_GPIO_NR(6, 31), "backlight");
 	gpio_direction_output(IMX_GPIO_NR(6, 31), 1);
+	gpio_free(IMX_GPIO_NR(6, 31));
 	/* LCD power enable */
+	gpio_request(IMX_GPIO_NR(6, 15), "LCD_power_enable");
 	gpio_direction_output(IMX_GPIO_NR(6, 15), 1);
+	gpio_free(IMX_GPIO_NR(6, 15));
 
 	/* enable backlight PWM 1 */
 	if (pwm_init(0, 0, 0))
@@ -524,11 +495,6 @@ static void setup_display(void)
 	enable_display_power();
 }
 
-static void setup_iomux_gpio(void)
-{
-	imx_iomux_v3_setup_multiple_pads(gpio_pads, ARRAY_SIZE(gpio_pads));
-}
-
 static void set_gpr_register(void)
 {
 	struct iomuxc *iomuxc_regs = (struct iomuxc *)IOMUXC_BASE_ADDR;
@@ -546,11 +512,12 @@ static void set_gpr_register(void)
 
 int board_early_init_f(void)
 {
-	setup_iomux_gpio();
-
+	gpio_request(SOFT_RESET_GPIO, "soft-reset");
 	gpio_direction_output(SOFT_RESET_GPIO, 1);
+	gpio_request(SD2_DRIVER_ENABLE, "sd2_driver_ena");
 	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
 	setup_display();
+
 	set_gpr_register();
 	return 0;
 }
@@ -564,8 +531,9 @@ static void setup_i2c4(void)
 static void setup_board_gpio(void)
 {
 	/* enable all LEDs */
-	gpio_request(IMX_GPIO_NR(2, 13), "LED ena"); /* 25 */
+	gpio_request(IMX_GPIO_NR(1, 25), "LED ena"); /* 25 */
 	gpio_direction_output(IMX_GPIO_NR(1, 25), 0);
+	gpio_free(IMX_GPIO_NR(1, 25));
 
 	/* switch off Status LEDs */
 #if (CONFIG_SYS_BOARD_VERSION == 2)
@@ -592,6 +560,7 @@ static void setup_board_gpio(void)
 static void setup_board_spi(void)
 {
 	/* enable spi bus #2 SS drivers (and spi bus #4 SS1 for rev2b) */
+	gpio_request(IMX_GPIO_NR(6, 6), "spi_ena");
 	gpio_direction_output(IMX_GPIO_NR(6, 6), 1);
 }
 

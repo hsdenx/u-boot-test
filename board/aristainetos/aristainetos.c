@@ -222,6 +222,7 @@ int board_init(void)
 	 */
 	imx_iomux_v3_setup_pad(MX6_PAD_SD2_DAT3__GPIO1_IO12 |
 			       MUX_PAD_CTRL(NO_PAD_CTRL));
+	gpio_request(IMX_GPIO_NR(1, 12), "dat3_hack");
 	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
 #endif
 
