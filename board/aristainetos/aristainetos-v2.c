@@ -20,8 +20,6 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/mach-imx/video.h>
-#include <mmc.h>
-#include <fsl_esdhc_imx.h>
 #include <miiphy.h>
 #include <netdev.h>
 #include <asm/arch/mxc_hdmi.h>
@@ -38,9 +36,6 @@
 #if defined(CONFIG_VIDEO_BMP_LOGO)
 	#include <bmp_logo.h>
 #endif
-
-#define USDHC2_PAD_CTRL (PAD_CTL_SPEED_LOW |			\
-	PAD_CTL_DSE_40ohm | PAD_CTL_SRE_FAST)
 
 #if (CONFIG_SYS_BOARD_VERSION == 2)
 	/* 4.3 display controller */
