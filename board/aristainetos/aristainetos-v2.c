@@ -20,8 +20,6 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/mach-imx/video.h>
-#include <miiphy.h>
-#include <netdev.h>
 #include <asm/arch/mxc_hdmi.h>
 #include <asm/arch/crm_regs.h>
 #include <linux/fb.h>
@@ -84,24 +82,6 @@ static iomux_v3_cfg_t const misc_pads[] = {
 	MX6_PAD_KEY_ROW4__USB_OTG_PWR		| MUX_PAD_CTRL(NO_PAD_CTRL),
 };
 
-iomux_v3_cfg_t const enet_pads[] = {
-	MX6_PAD_ENET_MDIO__ENET_MDIO		| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET_MDC__ENET_MDC		| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TXC__RGMII_TXC	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TD0__RGMII_TD0	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TD1__RGMII_TD1	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TD2__RGMII_TD2	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TD3__RGMII_TD3	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_TX_CTL__RGMII_TX_CTL	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET_REF_CLK__ENET_TX_CLK	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RXC__RGMII_RXC	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RD0__RGMII_RD0	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RD1__RGMII_RD1	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RD2__RGMII_RD2	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RD3__RGMII_RD3	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_RGMII_RX_CTL__RGMII_RX_CTL	| MUX_PAD_CTRL(ENET_PAD_CTRL),
-};
-
 static iomux_v3_cfg_t const backlight_pads[] = {
 	/* backlight PWM brightness control */
 	MX6_PAD_GPIO_9__PWM1_OUT | MUX_PAD_CTRL(NO_PAD_CTRL),
@@ -110,11 +90,6 @@ static iomux_v3_cfg_t const backlight_pads[] = {
 	/* LCD power enable */
 	MX6_PAD_NANDF_CS2__GPIO6_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
 };
-
-static void setup_iomux_enet(void)
-{
-	imx_iomux_v3_setup_multiple_pads(enet_pads, ARRAY_SIZE(enet_pads));
-}
 
 static iomux_v3_cfg_t const display_pads[] = {
 	MX6_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK | MUX_PAD_CTRL(DISP_PAD_CTRL),
@@ -170,12 +145,6 @@ int board_phy_config(struct phy_device *phydev)
 		phydev->drv->config(phydev);
 
 	return 0;
-}
-
-int board_eth_init(bd_t *bis)
-{
-	setup_iomux_enet();
-	return cpu_eth_init(bis);
 }
 
 static int rotate_logo_one(unsigned char *out, unsigned char *in)
@@ -445,10 +414,6 @@ static void set_gpr_register(void)
 
 int board_early_init_f(void)
 {
-	gpio_request(SOFT_RESET_GPIO, "soft-reset");
-	gpio_direction_output(SOFT_RESET_GPIO, 1);
-	gpio_request(SD2_DRIVER_ENABLE, "sd2_driver_ena");
-	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
 	setup_display();
 
 	set_gpr_register();
@@ -463,6 +428,11 @@ static void setup_i2c4(void)
 
 static void setup_board_gpio(void)
 {
+	gpio_request(SOFT_RESET_GPIO, "soft-reset");
+	gpio_direction_output(SOFT_RESET_GPIO, 1);
+	gpio_request(SD2_DRIVER_ENABLE, "sd2_driver_ena");
+	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
+
 	/* enable all LEDs */
 	gpio_request(IMX_GPIO_NR(1, 25), "LED ena"); /* 25 */
 	gpio_direction_output(IMX_GPIO_NR(1, 25), 0);
