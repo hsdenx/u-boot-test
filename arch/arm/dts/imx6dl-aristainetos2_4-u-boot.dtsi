@@ -43,3 +43,8 @@
 &aips2 {
 	u-boot,dm-pre-reloc;
 };
+
+&lcd_panel {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ipu_disp>;
+};

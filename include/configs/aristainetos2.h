@@ -36,7 +36,7 @@
 #define CONFIG_GPIO_ENABLE_SPI_FLASH	IMX_GPIO_NR(2, 15)
 
 /* Framebuffer */
-#define CONFIG_SYS_LDB_CLOCK 33246000
+#define CONFIG_SYS_LDB_CLOCK 28341000
 #define CONFIG_LG4573
 
 #include "aristainetos-common.h"
