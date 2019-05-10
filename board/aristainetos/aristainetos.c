@@ -18,13 +18,8 @@
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/mxc_i2c.h>
-#include <asm/mach-imx/video.h>
 #include <miiphy.h>
-#include <asm/arch/mxc_hdmi.h>
 #include <asm/arch/crm_regs.h>
-#include <linux/fb.h>
-#include <ipu_pixfmt.h>
-#include <input.h>
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
 #include <pwm.h>
@@ -40,8 +35,6 @@ DECLARE_GLOBAL_DATA_PTR;
 	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
 
 #define PC MUX_PAD_CTRL(I2C_PAD_CTRL)
-
-#define DISP_PAD_CTRL	(0x10)
 
 #if ((CONFIG_SYS_BOARD_VERSION == 2) || (CONFIG_SYS_BOARD_VERSION == 3))
 #include "./aristainetos-v2.c"
@@ -132,12 +125,6 @@ struct display_info_t const displays[] = {
 };
 size_t display_count = ARRAY_SIZE(displays);
 
-/* no console on this board */
-int board_cfb_skip(void)
-{
-	return 1;
-}
-
 iomux_v3_cfg_t nfc_pads[] = {
 	MX6_PAD_NANDF_CLE__NAND_CLE		| MUX_PAD_CTRL(NO_PAD_CTRL),
 	MX6_PAD_NANDF_ALE__NAND_ALE		| MUX_PAD_CTRL(NO_PAD_CTRL),
@@ -213,7 +200,7 @@ int board_init(void)
 	 */
 	imx_iomux_v3_setup_pad(MX6_PAD_SD2_DAT3__GPIO1_IO12 |
 			       MUX_PAD_CTRL(NO_PAD_CTRL));
-	gpio_request(IMX_GPIO_NR(1, 12), "dat3_hack");
+	gpio_request(IMX_GPIO_NR(1, 12), "sd2_dat3");
 	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
 #endif
 
@@ -232,6 +219,7 @@ int board_init(void)
 
 	setup_board_gpio();
 	setup_gpmi_nand();
+	setup_display();
 
 	/* GPIO_1 for USB_OTG_ID */
 	clrsetbits_le32(&iomux->gpr[1], IOMUXC_GPR1_USB_OTG_ID_SEL_MASK, 0);

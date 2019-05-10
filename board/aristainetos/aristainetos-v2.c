@@ -20,19 +20,15 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/mach-imx/video.h>
-#include <asm/arch/mxc_hdmi.h>
 #include <asm/arch/crm_regs.h>
-#include <linux/fb.h>
-#include <ipu_pixfmt.h>
 #include <asm/io.h>
 #include <asm/arch/sys_proto.h>
 #include <pwm.h>
 #include <micrel.h>
-#include <video.h>
-#include <../drivers/video/imx/ipu.h>
-#if defined(CONFIG_VIDEO_BMP_LOGO)
-	#include <bmp_logo.h>
-#endif
+#include <bmp_logo.h>
+#include <bmp_logo_data.h>
+#include <splash.h>
+#include <lcd.h>
 
 #if (CONFIG_SYS_BOARD_VERSION == 2)
 	/* 4.3 display controller */
@@ -89,37 +85,6 @@ static iomux_v3_cfg_t const backlight_pads[] = {
 	MX6_PAD_EIM_BCLK__GPIO6_IO31 | MUX_PAD_CTRL(NO_PAD_CTRL),
 	/* LCD power enable */
 	MX6_PAD_NANDF_CS2__GPIO6_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-
-static iomux_v3_cfg_t const display_pads[] = {
-	MX6_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK | MUX_PAD_CTRL(DISP_PAD_CTRL),
-	MX6_PAD_DI0_PIN15__IPU1_DI0_PIN15,
-	MX6_PAD_DI0_PIN2__IPU1_DI0_PIN02,
-	MX6_PAD_DI0_PIN3__IPU1_DI0_PIN03,
-	MX6_PAD_DISP0_DAT0__IPU1_DISP0_DATA00,
-	MX6_PAD_DISP0_DAT1__IPU1_DISP0_DATA01,
-	MX6_PAD_DISP0_DAT2__IPU1_DISP0_DATA02,
-	MX6_PAD_DISP0_DAT3__IPU1_DISP0_DATA03,
-	MX6_PAD_DISP0_DAT4__IPU1_DISP0_DATA04,
-	MX6_PAD_DISP0_DAT5__IPU1_DISP0_DATA05,
-	MX6_PAD_DISP0_DAT6__IPU1_DISP0_DATA06,
-	MX6_PAD_DISP0_DAT7__IPU1_DISP0_DATA07,
-	MX6_PAD_DISP0_DAT8__IPU1_DISP0_DATA08,
-	MX6_PAD_DISP0_DAT9__IPU1_DISP0_DATA09,
-	MX6_PAD_DISP0_DAT10__IPU1_DISP0_DATA10,
-	MX6_PAD_DISP0_DAT11__IPU1_DISP0_DATA11,
-	MX6_PAD_DISP0_DAT12__IPU1_DISP0_DATA12,
-	MX6_PAD_DISP0_DAT13__IPU1_DISP0_DATA13,
-	MX6_PAD_DISP0_DAT14__IPU1_DISP0_DATA14,
-	MX6_PAD_DISP0_DAT15__IPU1_DISP0_DATA15,
-	MX6_PAD_DISP0_DAT16__IPU1_DISP0_DATA16,
-	MX6_PAD_DISP0_DAT17__IPU1_DISP0_DATA17,
-	MX6_PAD_DISP0_DAT18__IPU1_DISP0_DATA18,
-	MX6_PAD_DISP0_DAT19__IPU1_DISP0_DATA19,
-	MX6_PAD_DISP0_DAT20__IPU1_DISP0_DATA20,
-	MX6_PAD_DISP0_DAT21__IPU1_DISP0_DATA21,
-	MX6_PAD_DISP0_DAT22__IPU1_DISP0_DATA22,
-	MX6_PAD_DISP0_DAT23__IPU1_DISP0_DATA23,
 };
 
 int board_phy_config(struct phy_device *phydev)
@@ -385,10 +350,6 @@ static void enable_spi_display(struct display_info_t const *dev)
 		  << IOMUXC_GPR3_LVDS0_MUX_CTL_OFFSET);
 	writel(reg, &iomux->gpr[3]);
 
-	imx_iomux_v3_setup_multiple_pads(
-		display_pads,
-		 ARRAY_SIZE(display_pads));
-
 	return;
 }
 static void setup_display(void)
@@ -414,8 +375,6 @@ static void set_gpr_register(void)
 
 int board_early_init_f(void)
 {
-	setup_display();
-
 	set_gpr_register();
 	return 0;
 }
@@ -430,8 +389,10 @@ static void setup_board_gpio(void)
 {
 	gpio_request(SOFT_RESET_GPIO, "soft-reset");
 	gpio_direction_output(SOFT_RESET_GPIO, 1);
+	gpio_free(SOFT_RESET_GPIO);
 	gpio_request(SD2_DRIVER_ENABLE, "sd2_driver_ena");
 	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
+	gpio_free(SD2_DRIVER_ENABLE);
 
 	/* enable all LEDs */
 	gpio_request(IMX_GPIO_NR(1, 25), "LED ena"); /* 25 */
@@ -458,13 +419,19 @@ static void setup_board_gpio(void)
 	gpio_request(IMX_GPIO_NR(2, 29), "LED blue"); /* 61 */
 	gpio_direction_output(IMX_GPIO_NR(2, 29), 0);
 #endif
+
+	/* enable spi bus #2 SS drivers (and spi bus #4 SS1 for rev2b) */
+	gpio_request(IMX_GPIO_NR(6, 6), "spi_bus");
+	gpio_direction_output(IMX_GPIO_NR(6, 6), 1);
+	gpio_free(IMX_GPIO_NR(6, 6));
 }
 
+#include <video_fb.h>
 int board_late_init(void)
 {
 	char *my_bootdelay;
 	char bootmode = 0;
-	char const *panel = env_get("panel");
+	int x, y;
 
 	/*
 	 * Check the boot-source. If booting from NOR Flash,
@@ -488,12 +455,8 @@ int board_late_init(void)
 			env_set("bootdelay", "-2");
 	}
 
-	/* if we have the lg panel, we can initialze it now */
-	if (panel)
-		if (!strcmp(panel, displays[1].mode.name))
-			lg4573_spi_startup(CONFIG_LG4573_BUS,
-					   CONFIG_LG4573_CS,
-					   10000000, SPI_MODE_0);
+	splash_get_pos(&x, &y);
+	bmp_display((ulong)&bmp_logo_bitmap[0], x, y);
 
 	return 0;
 }
