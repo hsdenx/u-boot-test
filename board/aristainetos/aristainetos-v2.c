@@ -18,7 +18,6 @@
 #include <asm/gpio.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/mach-imx/boot_mode.h>
-#include <asm/mach-imx/mxc_i2c.h>
 #include <asm/mach-imx/video.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/io.h>
@@ -42,32 +41,6 @@
 
 #define SOFT_RESET_GPIO		IMX_GPIO_NR(7, 13)
 #define SD2_DRIVER_ENABLE	IMX_GPIO_NR(7, 8)
-
-struct i2c_pads_info i2c_pad_info3 = {
-	.scl = {
-		.i2c_mode = MX6_PAD_GPIO_5__I2C3_SCL | PC,
-		.gpio_mode = MX6_PAD_GPIO_5__GPIO1_IO05 | PC,
-		.gp = IMX_GPIO_NR(1, 5)
-	},
-	.sda = {
-		.i2c_mode = MX6_PAD_GPIO_6__I2C3_SDA | PC,
-		.gpio_mode = MX6_PAD_GPIO_6__GPIO1_IO06 | PC,
-		.gp = IMX_GPIO_NR(1, 6)
-	}
-};
-
-struct i2c_pads_info i2c_pad_info4 = {
-	.scl = {
-		.i2c_mode = MX6_PAD_GPIO_7__I2C4_SCL | PC,
-		.gpio_mode = MX6_PAD_GPIO_7__GPIO1_IO07 | PC,
-		.gp = IMX_GPIO_NR(1, 7)
-	},
-	.sda = {
-		.i2c_mode = MX6_PAD_GPIO_8__I2C4_SDA | PC,
-		.gpio_mode = MX6_PAD_GPIO_8__GPIO1_IO08 | PC,
-		.gp = IMX_GPIO_NR(1, 8)
-	}
-};
 
 static iomux_v3_cfg_t const misc_pads[] = {
 	/* USB_OTG_ID = GPIO1_24*/
@@ -377,12 +350,6 @@ int board_early_init_f(void)
 {
 	set_gpr_register();
 	return 0;
-}
-
-static void setup_i2c4(void)
-{
-	setup_i2c(3, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
-		  &i2c_pad_info4);
 }
 
 static void setup_board_gpio(void)
