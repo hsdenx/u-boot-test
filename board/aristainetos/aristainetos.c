@@ -17,7 +17,7 @@
 #include <asm/gpio.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/mach-imx/boot_mode.h>
-#include <asm/mach-imx/mxc_i2c.h>
+#include <asm/mach-imx/video.h>
 #include <miiphy.h>
 #include <asm/arch/crm_regs.h>
 #include <asm/io.h>
@@ -30,42 +30,9 @@ DECLARE_GLOBAL_DATA_PTR;
 	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm |			\
 	PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
 
-#define I2C_PAD_CTRL	(PAD_CTL_PUS_100K_UP |			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
-	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
-
-#define PC MUX_PAD_CTRL(I2C_PAD_CTRL)
-
 #if ((CONFIG_SYS_BOARD_VERSION == 2) || (CONFIG_SYS_BOARD_VERSION == 3))
 #include "./aristainetos-v2.c"
 #endif
-
-
-struct i2c_pads_info i2c_pad_info1 = {
-	.scl = {
-		.i2c_mode = MX6_PAD_CSI0_DAT9__I2C1_SCL | PC,
-		.gpio_mode = MX6_PAD_CSI0_DAT9__GPIO5_IO27 | PC,
-		.gp = IMX_GPIO_NR(5, 27)
-	},
-	.sda = {
-		.i2c_mode = MX6_PAD_CSI0_DAT8__I2C1_SDA | PC,
-		.gpio_mode = MX6_PAD_CSI0_DAT8__GPIO5_IO26 | PC,
-		.gp = IMX_GPIO_NR(5, 26)
-	}
-};
-
-struct i2c_pads_info i2c_pad_info2 = {
-	.scl = {
-		.i2c_mode = MX6_PAD_KEY_COL3__I2C2_SCL | PC,
-		.gpio_mode = MX6_PAD_KEY_COL3__GPIO4_IO12 | PC,
-		.gp = IMX_GPIO_NR(4, 12)
-	},
-	.sda = {
-		.i2c_mode = MX6_PAD_KEY_ROW3__I2C2_SDA | PC,
-		.gpio_mode = MX6_PAD_KEY_ROW3__GPIO4_IO13 | PC,
-		.gp = IMX_GPIO_NR(4, 13)
-	}
-};
 
 int dram_init(void)
 {
@@ -203,14 +170,6 @@ int board_init(void)
 	gpio_request(IMX_GPIO_NR(1, 12), "sd2_dat3");
 	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
 #endif
-
-	setup_i2c(0, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
-		  &i2c_pad_info1);
-	setup_i2c(1, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
-		  &i2c_pad_info2);
-	setup_i2c(2, CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE,
-		  &i2c_pad_info3);
-	setup_i2c4();
 
 	/* SPI NOR Flash read only */
 	gpio_request(CONFIG_GPIO_ENABLE_SPI_FLASH, "ena_spi_nor");
