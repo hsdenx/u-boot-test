@@ -35,3 +35,8 @@
 		};
 	};
 };
+
+&backlight {
+	pwms = <&pwm1 0 300000>;
+	default-brightness-level = <2>;
+};
