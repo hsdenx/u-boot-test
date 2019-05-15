@@ -52,15 +52,6 @@ static iomux_v3_cfg_t const misc_pads[] = {
 	MX6_PAD_KEY_ROW4__USB_OTG_PWR		| MUX_PAD_CTRL(NO_PAD_CTRL),
 };
 
-static iomux_v3_cfg_t const backlight_pads[] = {
-	/* backlight PWM brightness control */
-	MX6_PAD_GPIO_9__PWM1_OUT | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* backlight enable */
-	MX6_PAD_EIM_BCLK__GPIO6_IO31 | MUX_PAD_CTRL(NO_PAD_CTRL),
-	/* LCD power enable */
-	MX6_PAD_NANDF_CS2__GPIO6_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-
 int board_phy_config(struct phy_device *phydev)
 {
 	/* control data pad skew - devaddr = 0x02, register = 0x04 */
@@ -131,39 +122,6 @@ void rotate_logo(int rotations)
 			for (j = 0; j < BMP_LOGO_HEIGHT; j++)
 				in_logo[i * BMP_LOGO_WIDTH + j] =
 				out_logo[i * BMP_LOGO_WIDTH + j];
-}
-
-static void enable_display_power(void)
-{
-	int ret;
-	struct udevice *pwmdev;
-
-	imx_iomux_v3_setup_multiple_pads(backlight_pads,
-					 ARRAY_SIZE(backlight_pads));
-
-	/* backlight enable */
-	gpio_request(IMX_GPIO_NR(6, 31), "backlight");
-	gpio_direction_output(IMX_GPIO_NR(6, 31), 1);
-	gpio_free(IMX_GPIO_NR(6, 31));
-	/* LCD power enable */
-	gpio_request(IMX_GPIO_NR(6, 15), "LCD_power_enable");
-	gpio_direction_output(IMX_GPIO_NR(6, 15), 1);
-	gpio_free(IMX_GPIO_NR(6, 15));
-
-	ret = uclass_get_device_by_name(UCLASS_PWM, "pwm@2080000", &pwmdev);
-	if (ret) {
-		printf("PWM not found\n");
-		goto error;
-	}
-	/* duty cycle 500ns, period: 3000ns */
-	pwm_set_config(pwmdev, 0, 300000, 10000);
-	pwm_set_enable(pwmdev, 0, true);
-
-	return;
-
-error:
-	puts("error init pwm for backlight\n");
-	return;
 }
 
 static void enable_lvds(struct display_info_t const *dev)
@@ -333,7 +291,6 @@ static void enable_spi_display(struct display_info_t const *dev)
 static void setup_display(void)
 {
 	enable_ipu_clock();
-	enable_display_power();
 }
 
 static void set_gpr_register(void)
