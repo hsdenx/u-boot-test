@@ -135,6 +135,9 @@ void rotate_logo(int rotations)
 
 static void enable_display_power(void)
 {
+	int ret;
+	struct udevice *pwmdev;
+
 	imx_iomux_v3_setup_multiple_pads(backlight_pads,
 					 ARRAY_SIZE(backlight_pads));
 
@@ -147,14 +150,15 @@ static void enable_display_power(void)
 	gpio_direction_output(IMX_GPIO_NR(6, 15), 1);
 	gpio_free(IMX_GPIO_NR(6, 15));
 
-	/* enable backlight PWM 1 */
-	if (pwm_init(0, 0, 0))
+	ret = uclass_get_device_by_name(UCLASS_PWM, "pwm@2080000", &pwmdev);
+	if (ret) {
+		printf("PWM not found\n");
 		goto error;
+	}
 	/* duty cycle 500ns, period: 3000ns */
-	if (pwm_config(0, 50000, 300000))
-		goto error;
-	if (pwm_enable(0))
-		goto error;
+	pwm_set_config(pwmdev, 0, 300000, 10000);
+	pwm_set_enable(pwmdev, 0, true);
+
 	return;
 
 error:
