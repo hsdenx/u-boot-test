@@ -28,6 +28,7 @@
 #include <bmp_logo_data.h>
 #include <splash.h>
 #include <lcd.h>
+#include <led.h>
 
 #if (CONFIG_SYS_BOARD_VERSION == 2)
 	/* 4.3 display controller */
@@ -352,6 +353,16 @@ int board_early_init_f(void)
 	return 0;
 }
 
+static void setup_one_led(char *label, int state)
+{
+	struct udevice *dev;
+	int ret;
+
+	ret = led_get_by_label(label, &dev);
+	if (ret == 0)
+		led_set_state(dev, state);
+}
+
 static void setup_board_gpio(void)
 {
 	gpio_request(SOFT_RESET_GPIO, "soft-reset");
@@ -361,22 +372,16 @@ static void setup_board_gpio(void)
 	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
 	gpio_free(SD2_DRIVER_ENABLE);
 
-	/* enable all LEDs */
-	gpio_request(IMX_GPIO_NR(1, 25), "LED ena"); /* 25 */
-	gpio_direction_output(IMX_GPIO_NR(1, 25), 0);
-	gpio_free(IMX_GPIO_NR(1, 25));
-
+	setup_one_led("led_ena", LEDST_ON);
 	/* switch off Status LEDs */
+	setup_one_led("led_yellow", LEDST_OFF);
+	setup_one_led("led_red", LEDST_OFF);
+	setup_one_led("led_green", LEDST_OFF);
+	setup_one_led("led_blue", LEDST_OFF);
+
 #if (CONFIG_SYS_BOARD_VERSION == 2)
-	gpio_request(IMX_GPIO_NR(6, 16), "LED yellow"); /* 176 */
-	gpio_direction_output(IMX_GPIO_NR(6, 16), 1);
-	gpio_request(IMX_GPIO_NR(2, 28), "LED red"); /* 60 */
-	gpio_direction_output(IMX_GPIO_NR(2, 28), 1);
-	gpio_request(IMX_GPIO_NR(5, 4), "LED green"); /* 132 */
-	gpio_direction_output(IMX_GPIO_NR(5, 4), 1);
-	gpio_request(IMX_GPIO_NR(2, 29), "LED blue"); /* 61 */
-	gpio_direction_output(IMX_GPIO_NR(2, 29), 1);
 #elif (CONFIG_SYS_BOARD_VERSION == 3)
+	/* ToDo move to DTS */
 	gpio_request(IMX_GPIO_NR(6, 16), "LED yellow"); /* 176 */
 	gpio_direction_output(IMX_GPIO_NR(6, 16), 0);
 	gpio_request(IMX_GPIO_NR(5, 0), "LED red"); /* 128 */
