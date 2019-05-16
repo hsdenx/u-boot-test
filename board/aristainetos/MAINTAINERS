@@ -7,3 +7,5 @@ F:	configs/aristainetos2_defconfig
 F:	arch/arm/dts/imx6dl-aristainetos2_4.dts
 F:	arch/arm/dts/imx6dl-aristainetos2_7.dts
 F:	arch/arm/dts/imx6qdl-aristainetos2.dtsi
+F:	arch/arm/dts/imx6dl-aristainetos2_4.dtsi
+F:	arch/arm/dts/imx6qdl-aristainetos2-common.dtsi
