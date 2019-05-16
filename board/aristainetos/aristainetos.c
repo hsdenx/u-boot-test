@@ -186,12 +186,6 @@ int board_init(void)
 	return 0;
 }
 
-int checkboard(void)
-{
-	printf("Board: %s\n", CONFIG_BOARDNAME);
-	return 0;
-}
-
 #ifdef CONFIG_USB_EHCI_MX6
 int board_ehci_hcd_init(int port)
 {
