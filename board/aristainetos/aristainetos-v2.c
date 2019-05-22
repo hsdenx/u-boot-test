@@ -40,9 +40,6 @@
 	#define ECSPI1_CS1		IMX_GPIO_NR(4, 10)
 #endif
 
-#define SOFT_RESET_GPIO		IMX_GPIO_NR(7, 13)
-#define SD2_DRIVER_ENABLE	IMX_GPIO_NR(7, 8)
-
 static iomux_v3_cfg_t const misc_pads[] = {
 	/* USB_OTG_ID = GPIO1_24*/
 	MX6_PAD_ENET_RX_ER__USB_OTG_ID		| MUX_PAD_CTRL(NO_PAD_CTRL),
@@ -326,42 +323,18 @@ static void setup_one_led(char *label, int state)
 
 static void setup_board_gpio(void)
 {
-	gpio_request(SOFT_RESET_GPIO, "soft-reset");
-	gpio_direction_output(SOFT_RESET_GPIO, 1);
-	gpio_free(SOFT_RESET_GPIO);
-	gpio_request(SD2_DRIVER_ENABLE, "sd2_driver_ena");
-	gpio_direction_output(SD2_DRIVER_ENABLE, 1);
-	gpio_free(SD2_DRIVER_ENABLE);
-
 	setup_one_led("led_ena", LEDST_ON);
 	/* switch off Status LEDs */
 	setup_one_led("led_yellow", LEDST_OFF);
 	setup_one_led("led_red", LEDST_OFF);
 	setup_one_led("led_green", LEDST_OFF);
 	setup_one_led("led_blue", LEDST_OFF);
-
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-#elif (CONFIG_SYS_BOARD_VERSION == 3)
-	/* ToDo move to DTS */
-	gpio_request(IMX_GPIO_NR(6, 16), "LED yellow"); /* 176 */
-	gpio_direction_output(IMX_GPIO_NR(6, 16), 0);
-	gpio_request(IMX_GPIO_NR(5, 0), "LED red"); /* 128 */
-	gpio_direction_output(IMX_GPIO_NR(5, 0), 0);
-	gpio_request(IMX_GPIO_NR(5, 4), "LED green"); /* 132 */
-	gpio_direction_output(IMX_GPIO_NR(5, 4), 0);
-	gpio_request(IMX_GPIO_NR(2, 29), "LED blue"); /* 61 */
-	gpio_direction_output(IMX_GPIO_NR(2, 29), 0);
-#endif
-
-	/* enable spi bus #2 SS drivers (and spi bus #4 SS1 for rev2b) */
-	gpio_request(IMX_GPIO_NR(6, 6), "spi_bus");
-	gpio_direction_output(IMX_GPIO_NR(6, 6), 1);
-	gpio_free(IMX_GPIO_NR(6, 6));
 }
 
 #include <video_fb.h>
 int board_late_init(void)
 {
+	struct gpio_desc *desc;
 	char *my_bootdelay;
 	char bootmode = 0;
 	int x, y;
@@ -370,15 +343,15 @@ int board_late_init(void)
 	 * Check the boot-source. If booting from NOR Flash,
 	 * disable bootdelay
 	 */
-	gpio_request(IMX_GPIO_NR(7, 6), "bootsel0");
-	gpio_direction_input(IMX_GPIO_NR(7, 6));
-	gpio_request(IMX_GPIO_NR(7, 7), "bootsel1");
-	gpio_direction_input(IMX_GPIO_NR(7, 7));
-	gpio_request(IMX_GPIO_NR(7, 1), "bootsel2");
-	gpio_direction_input(IMX_GPIO_NR(7, 1));
-	bootmode |= (gpio_get_value(IMX_GPIO_NR(7, 6)) ? 1 : 0) << 0;
-	bootmode |= (gpio_get_value(IMX_GPIO_NR(7, 7)) ? 1 : 0) << 1;
-	bootmode |= (gpio_get_value(IMX_GPIO_NR(7, 1)) ? 1 : 0) << 2;
+	desc = gpio_hog_lookup_name("bootsel0");
+	if (desc)
+		bootmode |= (dm_gpio_get_value(desc) ? 1 : 0) << 0;
+	desc = gpio_hog_lookup_name("bootsel1");
+	if (desc)
+		bootmode |= (dm_gpio_get_value(desc) ? 1 : 0) << 1;
+	desc = gpio_hog_lookup_name("bootsel2");
+	if (desc)
+		bootmode |= (dm_gpio_get_value(desc) ? 1 : 0) << 2;
 
 	if (bootmode == 7) {
 		my_bootdelay = env_get("nor_bootdelay");
@@ -390,6 +363,22 @@ int board_late_init(void)
 
 	splash_get_pos(&x, &y);
 	bmp_display((ulong)&bmp_logo_bitmap[0], x, y);
+
+	/* read out some jumper values*/
+	desc = gpio_hog_lookup_name("env_reset");
+	if (desc) {
+		if (dm_gpio_get_value(desc)) {
+			printf("\nClear u-boot environment (set back to defaults)\n");
+			run_command("run default_env; saveenv; saveenv", 0);
+		}
+	}
+	desc = gpio_hog_lookup_name("boot_rescue");
+	if (desc) {
+		if (dm_gpio_get_value(desc)) {
+			printf("\nBooting into Rescue System\n");
+			run_command("run rescue_load_fit rescueboot", 0);
+		}
+	}
 
 	return 0;
 }
