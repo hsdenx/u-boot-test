@@ -10,6 +10,10 @@
 #include <dt-bindings/clock/imx6qdl-clock.h>
 
 / {
+	aliases {
+		eeprom0 = &i2c_eeprom0;
+	};
+
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm1 0 5000000>;
@@ -254,12 +258,12 @@
 	pinctrl-0 = <&pinctrl_i2c4>;
 	status = "okay";
 
-	eeprom@50{
+	i2c_eeprom0: eeprom@50{
 		compatible = "atmel,24c64";
 		reg = <0x50>;
 	};
 
-	eeprom@57{
+	i2c_eeprom1: eeprom@57{
 		compatible = "atmel,24c64";
 		reg = <0x57>;
 	};
