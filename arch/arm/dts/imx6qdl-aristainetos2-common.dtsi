@@ -230,6 +230,17 @@
 		reg = <0x20>;
 		#gpio-cells = <2>;
 		gpio-controller;
+
+		env_reset {
+			gpio-hog;
+			input;
+			gpios = <6 GPIO_ACTIVE_LOW>;
+		};
+		boot_rescue {
+			gpio-hog;
+			input;
+			gpios = <7 GPIO_ACTIVE_LOW>;
+		};
 	};
 
 	rtc@68 {

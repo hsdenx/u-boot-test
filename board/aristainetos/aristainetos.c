@@ -153,24 +153,6 @@ int board_init(void)
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
-#if (CONFIG_SYS_BOARD_VERSION == 2)
-	/*
-	 * usdhc2 has a levelshifter on the carrier board Rev. DV1,
-	 * that will automatically detect the driving direction.
-	 * During initialisation this isn't working correctly,
-	 * which causes DAT3 to be driven low towards the SD-card.
-	 * This causes a SD-card enetring the SPI-Mode
-	 * and therefore getting inaccessible until next power cycle.
-	 * As workaround we drive the DAT3 line as GPIO and set it high.
-	 * This makes usdhc2 unusable in u-boot, but works for the
-	 * initialisation in Linux
-	 */
-	imx_iomux_v3_setup_pad(MX6_PAD_SD2_DAT3__GPIO1_IO12 |
-			       MUX_PAD_CTRL(NO_PAD_CTRL));
-	gpio_request(IMX_GPIO_NR(1, 12), "sd2_dat3");
-	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
-#endif
-
 	/* SPI NOR Flash read only */
 	gpio_request(CONFIG_GPIO_ENABLE_SPI_FLASH, "ena_spi_nor");
 	gpio_direction_output(CONFIG_GPIO_ENABLE_SPI_FLASH, 0);
