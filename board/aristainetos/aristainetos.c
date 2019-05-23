@@ -153,11 +153,6 @@ int board_init(void)
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
-	/* SPI NOR Flash read only */
-	gpio_request(CONFIG_GPIO_ENABLE_SPI_FLASH, "ena_spi_nor");
-	gpio_direction_output(CONFIG_GPIO_ENABLE_SPI_FLASH, 0);
-	gpio_free(CONFIG_GPIO_ENABLE_SPI_FLASH);
-
 	setup_board_gpio();
 	setup_gpmi_nand();
 	setup_display();
