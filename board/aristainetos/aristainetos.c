@@ -196,13 +196,28 @@ int board_fit_config_name_match(const char *name)
 {
 	char *boardtype;
 
-	boardtype = env_get("board_type");
-	if (!strcmp(name, "imx6dl-aristainetos2_4"))
-		if (!strcmp(boardtype, "aristainetos2_4"))
+	if (gd->flags & GD_FLG_SERIAL_READY) {
+		boardtype = env_get("board_type");
+		if (!strcmp(name, "imx6dl-aristainetos2_4"))
+			if (!strcmp(boardtype, "aristainetos2_4@1"))
+				return 0;
+		if (!strcmp(name, "imx6dl-aristainetos2_7"))
+			if (!strcmp(boardtype, "aristainetos2_7@1"))
+				return 0;
+	} else {
+		/* on early stages use this as default */
+		if (!strcmp(name, "imx6dl-aristainetos2_4"))
 			return 0;
-	if (!strcmp(name, "imx6dl-aristainetos2_7"))
-		if (!strcmp(boardtype, "aristainetos2_7"))
-			return 0;
+	};
 
 	return -1;
 }
+
+#ifdef CONFIG_DTB_RESELECT
+int embedded_dtb_select(void)
+{
+	fdtdec_setup();
+
+	return 0;
+}
+#endif
