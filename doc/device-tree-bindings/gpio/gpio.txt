@@ -210,3 +210,19 @@ Example 2:
 Here, three GPIO ranges are defined wrt. two pin controllers. pinctrl1 GPIO
 ranges are defined using pin numbers whereas the GPIO ranges wrt. pinctrl2
 are named "foo" and "bar".
+
+The GPIO chip may contain GPIO hog definitions. GPIO hogging is a mechanism
+providing automatic GPIO request and configuration as part of the
+gpio-controller's driver probe function.
+
+Each GPIO hog definition is represented as a child node of the GPIO controller.
+Required properties:
+- gpio-hog:   A property specifying that this child node represents a GPIO hog.
+- gpios:      Store the GPIO information (id, flags) for the GPIO to
+	      affect. ! Not yet support more than one gpio !
+Only one of the following properties scanned in the order shown below.
+- input:      A property specifying to set the GPIO direction as input.
+- output-low  A property specifying to set the GPIO direction as output with
+	      the value low.
+- output-high A property specifying to set the GPIO direction as output with
+	      the value high.
