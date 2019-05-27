@@ -31,9 +31,6 @@
 		"ubifsload ${fit_addr_r} /boot/system.itb; " \
 		"imi ${fit_addr_r}\0 "
 
-#define ARISTAINETOS_USB_OTG_PWR	IMX_GPIO_NR(4, 15)
-#define ARISTAINETOS_USB_H1_PWR	IMX_GPIO_NR(1, 0)
-
 /* Framebuffer */
 #define CONFIG_SYS_LDB_CLOCK 28341000
 #define CONFIG_LG4573
