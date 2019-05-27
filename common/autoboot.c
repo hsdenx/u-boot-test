@@ -80,6 +80,17 @@ static int passwd_abort_sha256(uint64_t etime)
 	int abort = 0;
 	int size = sizeof(sha);
 	int ret;
+	char *s;
+	int bootdelay;
+
+	s = env_get("bootdelay");
+	bootdelay = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
+	/*
+	 * special case: -2
+	 * autoboot with no delay and not check for abort
+	 */
+	if (bootdelay == -2)
+		return 0;
 
 	if (sha_env_str == NULL)
 		sha_env_str = AUTOBOOT_STOP_STR_SHA256;
