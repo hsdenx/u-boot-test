@@ -362,12 +362,13 @@ static int aristainetos_eeprom(void)
 	return 0;
 };
 
-int board_late_init(void)
+static void aristainetos_bootmode_settings(void)
 {
 	struct gpio_desc *desc;
+	struct src *psrc = (struct src *)SRC_BASE_ADDR;
 	char *my_bootdelay;
 	char bootmode = 0;
-	int x, y;
+	unsigned int sbmr1 = readl(&psrc->sbmr1);
 	int ret;
 
 	/*
@@ -392,8 +393,24 @@ int board_late_init(void)
 			env_set("bootdelay", "-2");
 	}
 
+	if (sbmr1 & 0x40) {
+		env_set("bootmode", "1");
+		printf("SD bootmode jumper set!\n");
+	} else {
+		env_set("bootmode", "0");
+	}
+}
+
+int board_late_init(void)
+{
+	struct gpio_desc *desc;
+	int x, y;
+	int ret;
+
 	splash_get_pos(&x, &y);
 	bmp_display((ulong)&bmp_logo_bitmap[0], x, y);
+
+	aristainetos_bootmode_settings();
 
 	/* read out some jumper values*/
 	ret = gpio_hog_lookup_name("env_reset", &desc);
