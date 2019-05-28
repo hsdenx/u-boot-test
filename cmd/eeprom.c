@@ -61,6 +61,41 @@
 
 #if defined(CONFIG_DM_I2C)
 int eeprom_i2c_bus;
+
+struct udevice *eeprom_dev;
+
+#include <dm/device.h>
+#include <dm/uclass-internal.h>
+
+static void eeprom_do_fixups(struct udevice *dev)
+{
+	const struct device_node *np = ofnode_to_np(dev->node);
+
+	if (!np)
+		return;
+
+	if (device_is_compatible(dev, "atmel,24c64"))
+		i2c_set_chip_offset_len(dev, 2);
+
+	return;
+}
+
+static struct udevice *eeprom_get_device(char *name)
+{
+	struct udevice *dev;
+	int __maybe_unused ret;
+
+	for (ret = uclass_find_first_device(UCLASS_I2C_EEPROM, &dev); dev;
+	     ret = uclass_find_next_device(&dev)) {
+		if (!strcmp(dev->name, name)) {
+			eeprom_do_fixups(dev);
+			return dev;
+		}
+	}
+
+	return NULL;
+}
+
 #endif
 
 __weak int eeprom_write_enable(unsigned dev_addr, int state)
@@ -133,12 +168,17 @@ static int eeprom_rw_block(unsigned offset, uchar *addr, unsigned alen,
 #if defined(CONFIG_DM_I2C)
 	struct udevice *dev;
 
-	ret = i2c_get_chip_for_busnum(eeprom_i2c_bus, addr[0],
-				      alen - 1, &dev);
-	if (ret) {
-		printf("%s: Cannot find udev for a bus %d\n", __func__,
-		       eeprom_i2c_bus);
-		return CMD_RET_FAILURE;
+	if (eeprom_dev) {
+		dev = eeprom_dev;
+	} else {
+		ret = i2c_get_chip_for_busnum(eeprom_i2c_bus, addr[0],
+					      alen - 1, &dev);
+
+		if (ret) {
+			printf("%s: Cannot find udev for a bus %d\n", __func__,
+			       eeprom_i2c_bus);
+			return CMD_RET_FAILURE;
+		}
 	}
 
 	if (read)
@@ -252,6 +292,11 @@ static int parse_i2c_bus_addr(int *i2c_bus, ulong *i2c_addr, int argc,
 	if (argc == argc_no_bus) {
 		*i2c_bus = -1;
 		*i2c_addr = parse_numeric_param(argv[0]);
+		/* backwards compatible, if bus number is passed */
+		if (*i2c_addr != -1)
+			eeprom_dev = NULL;
+		else
+			eeprom_dev = eeprom_get_device(argv[0]);
 
 		return 1;
 	}
