@@ -5,9 +5,6 @@ source "board/aristainetos/common/Kconfig"
 config SYS_BOARD
 	default "aristainetos"
 
-config SYS_CONFIG_NAME
-	default "aristainetos2"
-
 config SYS_BOARD_VERSION
 	default 2
 
