@@ -561,22 +561,27 @@ int board_init(void)
 	return 0;
 }
 
+#if (CONFIG_SYS_BOARD_VERSION == 5)
+#define ARI_CMP_LEN	16
+#elif (CONFIG_SYS_BOARD_VERSION == 4)
+#define ARI_CMP_LEN	20
+#elif (CONFIG_SYS_BOARD_VERSION == 3)
+#define ARI_CMP_LEN	16
+#else
+#define ARI_CMP_LEN	15
+#endif
+
 int board_fit_config_name_match(const char *name)
 {
 	char *boardtype;
 
 	if (gd->flags & GD_FLG_SERIAL_READY) {
 		boardtype = env_get("board_type");
-		if (!strcmp(name, "imx6dl-aristainetos2_4"))
-			if (!strcmp(boardtype, "aristainetos2_4@1"))
-				return 0;
-		if (!strcmp(name, "imx6dl-aristainetos2_7"))
-			if (!strcmp(boardtype, "aristainetos2_7@1"))
-				return 0;
-	} else {
-		/* on early stages use this as default */
-		if (!strcmp(name, "imx6dl-aristainetos2_4"))
+		if (!strncmp(&name[7], boardtype, ARI_CMP_LEN))
 			return 0;
+	} else {
+		/* on early stages use first as default */
+		return 0;
 	};
 
 	return -1;

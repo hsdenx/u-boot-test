@@ -1,0 +1,30 @@
+DTS structure for aristainetos 2 / 2b board
+
+	arch/arm/dts/imx6dl-aristainetos2_4.dtsi	arch/arm/dts/imx6dl-aristainetos2_7.dtsi
+	common settingss for 2_4 boards			common settingss for 2_7 boards
+	u-boot overwrites:				u-boot overwrites:
+	  imx6dl-aristainetos2_4-u-boot.dtsi		imx6dl-aristainetos2_7-u-boot.dtsi
+
+	|			|				|			|
+	v			v				v			v
+
+imx6dl-aristainetos2_4.dts   imx6dl-aristainetos2b_4.dts   imx6dl-aristainetos2_7.dts   imx6dl-aristainetos2b_7.dts
+
+	^				^			^				^
+	|				|			|				|
+	|				|			|				|
+	|	-------------------------------------------------		-----------------
+	|	|			|					|
+	|	|			----------------			|
+	|	|					|			|
+	imx6qdl-aristainetos2.dtsi			imx6qdl-aristainetos2b.dtsi
+	common parts for version 2 board		common parts for version 2b board
+
+	u-boot-overwrites:				u-boot-overwrites:
+	  imx6qdl-aristainetos2-u-boot.dtsi		  imx6qdl-aristainetos2b-u-boot.dtsi
+
+		    ^						^
+        	    |						|
+
+			imx6qdl-aristainetos2-common.dtsi
+			common parts for aristainetos 2 board
