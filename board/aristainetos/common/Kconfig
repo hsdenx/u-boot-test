@@ -27,3 +27,6 @@ config ENV_SECT_SIZE
 
 config ENV_OFFSET
 	default 0xd0000
+
+config SYS_CONFIG_NAME
+	default "aristainetos2"
