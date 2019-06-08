@@ -361,7 +361,6 @@
 /* Commands */
 
 /* Watchdog */
-#define CONFIG_WATCHDOG_TIMEOUT_MSECS   15000
 
 /* ENV config */
 #ifdef CONFIG_ENV_IS_IN_SPI_FLASH
