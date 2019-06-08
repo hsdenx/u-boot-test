@@ -34,6 +34,11 @@
 			gpios = <&gpio6 16 GPIO_ACTIVE_LOW>;
 		};
 	};
+
+	wdt-reboot {
+		compatible = "wdt-reboot";
+		wdt = <&wdog1>;
+	};
 };
 
 &backlight {
