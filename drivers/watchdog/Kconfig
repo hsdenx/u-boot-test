@@ -161,4 +161,11 @@ config WDT_MPC8xx
 	help
 	   Select this to enable mpc8xx watchdog timer
 
+config SPL_WDT
+	bool "Enable driver model for watchdog timer drivers in SPL"
+	depends on SPL_DM
+	help
+	  Enable driver model for watchdog timer in SPL.
+	  This is similar to CONFIG_WDT in U-Boot.
+
 endmenu
