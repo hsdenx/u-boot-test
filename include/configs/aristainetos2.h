@@ -407,7 +407,8 @@
 		"fi; " \
 	"else "\
 		"run main_rescue_boot;" \
-	"fi; "\
+	"fi;\0"\
+	"ari_boot_denx=echo do nothing\0" \
 	HAB_EXTRA_SETTINGS \
 	CONFIG_EXTRA_ENV_BOARD_SETTINGS
 
