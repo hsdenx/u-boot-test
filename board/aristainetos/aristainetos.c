@@ -447,14 +447,15 @@ int board_late_init(void)
 	if (!ret) {
 		if (dm_gpio_get_value(desc)) {
 			printf("\nClear u-boot environment (set back to defaults)\n");
-			run_command("run default_env; saveenv; saveenv", 0);
+			//run_command("run default_env; saveenv; saveenv", 0);
 		}
 	}
 	ret = gpio_hog_lookup_name("boot_rescue", &desc);
 	if (!ret) {
 		if (dm_gpio_get_value(desc)) {
-			aristainetos_run_rescue_command(16);
-			run_command("run rescue_xload_boot", 0);
+			printf("\n Ich wuerde nun rescue command starten.\n");
+			//aristainetos_run_rescue_command(16);
+			//run_command("run rescue_xload_boot", 0);
 		}
 	}
 
