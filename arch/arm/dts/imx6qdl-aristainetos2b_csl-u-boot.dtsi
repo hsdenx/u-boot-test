@@ -1,0 +1,114 @@
+// SPDX-License-Identifier: GPL-2.0+ or X11
+/*
+ * Copyright (C) 2019 Heiko Schocher <hs@denx.de>
+ */
+
+/ {
+	chosen {
+		u-boot,dm-pre-reloc;
+		stdout-path = &uart1;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gpio>;
+
+		LED_blue {
+			label = "led_blue";
+			gpios = <&gpio2 29 GPIO_ACTIVE_HIGH>;
+		};
+
+		LED_ena {
+			label = "led_ena";
+			gpios = <&gpio1 25 GPIO_ACTIVE_HIGH>;
+		};
+
+		LED_green {
+			label = "led_green";
+			gpios = <&gpio5 4 GPIO_ACTIVE_HIGH>;
+		};
+
+		LED_red {
+			label = "led_red";
+			gpios = <&gpio5 0 GPIO_ACTIVE_HIGH>;
+		};
+
+		LED_yellow {
+			label = "led_yellow";
+			gpios = <&gpio6 16 GPIO_ACTIVE_HIGH>;
+		};
+
+		LED_blue_2 {
+			label = "led_blue2";
+			gpios = <&expander 15 GPIO_ACTIVE_LOW>;
+		};
+
+		LED_green_2 {
+			label = "led_green2";
+			gpios = <&expander 14 GPIO_ACTIVE_LOW>;
+		};
+
+		LED_red_2 {
+			label = "led_red2";
+			gpios = <&expander 12 GPIO_ACTIVE_LOW>;
+		};
+
+		LED_yellow_2 {
+			label = "led_yellow2";
+			gpios = <&expander 13 GPIO_ACTIVE_LOW>;
+		};
+
+	};
+
+	soc {
+		aips-bus@2000000 {
+			u-boot,dm-spl;
+			spba-bus@2000000 {
+				u-boot,dm-spl;
+			};
+		};
+	};
+};
+
+&backlight {
+	pwms = <&pwm1 0 300000>;
+	default-brightness-level = <2>;
+};
+
+&ecspi1 {
+	cs-gpios = <&gpio2 30 GPIO_ACTIVE_LOW
+		    &gpio4 10 GPIO_ACTIVE_LOW
+		    &gpio4 11 GPIO_ACTIVE_LOW>;
+};
+
+&ecspi2 {
+	cs-gpios = <&gpio2 26 GPIO_ACTIVE_LOW &gpio2 27 GPIO_ACTIVE_LOW>;
+};
+
+&ecspi4 {
+	cs-gpios = <&gpio3 29 GPIO_ACTIVE_LOW &gpio5 2 GPIO_ACTIVE_LOW>;
+};
+
+&uart1 {
+	u-boot,dm-pre-reloc;
+};
+
+&pinctrl_gpio {
+	u-boot,dm-pre-reloc;
+};
+
+&pinctrl_uart1 {
+	u-boot,dm-pre-reloc;
+};
+
+&iomuxc {
+	u-boot,dm-pre-reloc;
+};
+
+&aips1 {
+	u-boot,dm-pre-reloc;
+	spba-bus@2000000 {
+		u-boot,dm-pre-reloc;
+	};
+};
