@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: (GPL-2.0)
+/*
+ * support for the imx6 based aristainetos2 board
+ *
+ * Copyright (C) 2019 Heiko Schocher <hs@denx.de>
+ * Copyright (C) 2015 Heiko Schocher <hs@denx.de>
+ *
+ */
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/clock/imx6qdl-clock.h>
+
+#include "imx6qdl-aristainetos2-common.dtsi"
+
+&ecspi1 {
+	cs-gpios = <&gpio2 30 GPIO_ACTIVE_HIGH
+		    &gpio4 10 GPIO_ACTIVE_HIGH
+		    &gpio4 11 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi1>;
+	status = "okay";
+
+	flash: m25p80@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "micron,n25q128a11", "jedec,spi-nor";
+		spi-max-frequency = <20000000>;
+		reg = <0>;
+	};
+
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio>;
+
+	pinctrl_ecspi1: ecspi1grp {
+		fsl,pins = <
+			MX6QDL_PAD_EIM_D17__ECSPI1_MISO 0x100b1
+			MX6QDL_PAD_EIM_D18__ECSPI1_MOSI 0x100b1
+			MX6QDL_PAD_EIM_D16__ECSPI1_SCLK 0x100b1
+			MX6QDL_PAD_EIM_EB2__GPIO2_IO30 /* SS0# */
+			MX6QDL_PAD_KEY_COL2__GPIO4_IO10 0x100b1 /* SS1# */
+			MX6QDL_PAD_KEY_ROW2__GPIO4_IO11 0x100b1 /* SS2# */
+		>;
+	};
+
+	pinctrl_gpio: gpiogrp {
+		fsl,pins = <
+			MX6QDL_PAD_ENET_CRS_DV__GPIO1_IO25	0x1b0b0 /* led enable */
+			MX6QDL_PAD_NANDF_CS2__GPIO6_IO15	0x1b0b0 /* LCD power enable */
+			MX6QDL_PAD_NANDF_CS3__GPIO6_IO16	0x1b0b0 /* led yellow */
+			MX6QDL_PAD_EIM_WAIT__GPIO5_IO00		(0x1b0b0 | 0x40000000) /* led red */
+			MX6QDL_PAD_EIM_A24__GPIO5_IO04		0x1b0b0 /* led green */
+			MX6QDL_PAD_EIM_EB1__GPIO2_IO29		0x1b0b0 /* led blue */
+			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x1b0b0 /* Profibus IRQ */
+			MX6QDL_PAD_SD3_DAT6__GPIO6_IO18		0x1b0b0 /* FPGA IRQ */
+			MX6QDL_PAD_EIM_A23__GPIO6_IO06		0x1b0b0 /* spi bus #2 SS driver enable */
+			MX6QDL_PAD_GPIO_18__GPIO7_IO13		0x1b0b0 /* RST_LOC# PHY reset input (has pull-down!)*/
+			MX6QDL_PAD_ENET_RX_ER__USB_OTG_ID	0x1b0b0 /* USB_OTG_ID = GPIO1_24*/
+			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09		0x1b0b0 /* Touchscreen IRQ */
+			MX6QDL_PAD_EIM_A22__GPIO2_IO16		0x1b0b0 /* PCIe reset */
+		>;
+	};
+};

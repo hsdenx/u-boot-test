@@ -463,7 +463,9 @@ struct display_info_t const displays[] = {
 			.vmode          = FB_VMODE_NONINTERLACED
 		}
 	}
-#if ((CONFIG_SYS_BOARD_VERSION == 2) || (CONFIG_SYS_BOARD_VERSION == 3))
+#if ((CONFIG_SYS_BOARD_VERSION == 2) || \
+	(CONFIG_SYS_BOARD_VERSION == 3) || \
+	(CONFIG_SYS_BOARD_VERSION == 4))
 	, {
 		.bus	= -1,
 		.addr	= 0,
