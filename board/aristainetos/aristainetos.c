@@ -465,7 +465,8 @@ struct display_info_t const displays[] = {
 	}
 #if ((CONFIG_SYS_BOARD_VERSION == 2) || \
 	(CONFIG_SYS_BOARD_VERSION == 3) || \
-	(CONFIG_SYS_BOARD_VERSION == 4))
+	(CONFIG_SYS_BOARD_VERSION == 4) || \
+	(CONFIG_SYS_BOARD_VERSION == 5))
 	, {
 		.bus	= -1,
 		.addr	= 0,

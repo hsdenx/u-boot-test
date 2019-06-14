@@ -564,6 +564,8 @@ dtb-y += \
 	imx6dl-aristainetos2b_7.dtb \
 	imx6dl-aristainetos2b_csl_4.dtb \
 	imx6dl-aristainetos2b_csl_7.dtb \
+	imx6dl-aristainetos2c_4.dtb \
+	imx6dl-aristainetos2c_7.dtb \
 	imx6dl-dhcom-pdk2.dtb \
 	imx6dl-icore.dtb \
 	imx6dl-icore-mipi.dtb \
