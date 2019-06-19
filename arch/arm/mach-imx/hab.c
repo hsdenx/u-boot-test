@@ -14,6 +14,9 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/mach-imx/hab.h>
 
+#undef DEBUG
+#define DEBUG
+
 #define ALIGN_SIZE		0x1000
 #define MX6DQ_PU_IROM_MMU_EN_VAR	0x009024a8
 #define MX6DLS_PU_IROM_MMU_EN_VAR	0x00901dd0
@@ -587,7 +590,7 @@ int imx_hab_authenticate_image(uint32_t ddr_start, uint32_t image_size,
 	/* Verify if IVT DCD pointer is NULL */
 	if (ivt->dcd) {
 		puts("Error: DCD pointer must be NULL\n");
-		goto hab_authentication_exit;
+		//goto hab_authentication_exit;
 	}
 
 	start = ddr_start;
