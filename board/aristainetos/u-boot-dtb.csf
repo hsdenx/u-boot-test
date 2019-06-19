@@ -1,0 +1,29 @@
+[Header]
+Version = 4.1
+Hash Algorithm = sha256
+Engine Configuration = 0
+Certificate Format = X509
+Signature Format = CMS
+Engine = CAAM
+
+[Install SRK]
+File = "../../crts/SRK_1_2_3_4_table.bin"
+Source index = 0
+
+[Install CSFK]
+File = "../../crts/CSF1_1_sha256_4096_65537_v3_usr_crt.pem"
+
+[Authenticate CSF]
+
+[Install Key]
+Verification index = 0
+Target Index = 2
+File= "../../crts/IMG1_1_sha256_4096_65537_v3_usr_crt.pem"
+
+[Authenticate Data]
+Verification index = 2
+Blocks = 0x177ff400 0x00000000 0x000bfc00 "u-boot-dtb.imx"
+
+[Unlock]
+Engine = CAAM
+Features = RNG
