@@ -9,11 +9,6 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_gpio>;
 
-		LED_blue {
-			label = "led_blue";
-			gpios = <&gpio2 29 GPIO_ACTIVE_LOW>;
-		};
-
 		LED_ena {
 			label = "led_ena";
 			gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
@@ -80,6 +75,12 @@
 		gpio-hog;
 		output-high;
 		gpios = <15 GPIO_ACTIVE_HIGH>;
+	};
+	LED_blue {
+		gpio-hog;
+		output-high;
+		line-name = "led_blue";
+		gpios = <29 GPIO_ACTIVE_LOW>;
 	};
 };
 
