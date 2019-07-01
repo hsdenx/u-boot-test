@@ -332,6 +332,7 @@
 		device_type = "pci";
 		reg = <0xe0008000 0x1000>;
 		clock-frequency = <66666666>;
+		law_trgt_if = <0>;
 
 		interrupt-map-mask = <0xf800 0x0 0x0 0x7>;
 		interrupt-map = <
