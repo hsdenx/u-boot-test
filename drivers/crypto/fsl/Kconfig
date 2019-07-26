@@ -1,6 +1,16 @@
 config FSL_CAAM
 	bool "Freescale Crypto Driver Support"
-	select SHA_HW_ACCEL
+	#
+	# The FSL-CAAM driver requires DMA-allocated buffers for input and output,
+	# which nobody thought about when committing this driver.
+	# This breaks autoboot.c as well as cmd_hash.
+	# On the console you see:
+	#   Error: Address arguments are not aligned
+	#   CAAM was not setup properly or it is faulty
+	# Disable the HW_ACCEL feature for now, u-boot uses software functions in that case.
+	# The boot-image check always use the software functions and there for will not fail.
+	#
+	#  select SHA_HW_ACCEL
 	imply CMD_HASH
 	help
 	  Enables the Freescale's Cryptographic Accelerator and Assurance
