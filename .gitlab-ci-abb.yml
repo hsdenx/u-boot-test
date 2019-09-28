@@ -1,0 +1,27 @@
+stages:
+        - build
+        - test
+
+build-k30rf:
+        tags:
+                - hs-threadripper-runner-abb
+        stage: build
+        script:
+                - pwd
+                - whoami
+                - git clone git@gitlab.denx.de:abb/tbot-tbot2go.git
+                - cd tbot-tbot2go
+                - git checkout aristainetos
+                - tbot --version
+                - tbot @argsaristainetos -C ${PWD} -f pollux-build -vv ari_ub_build
+
+basic_checks:
+        tags:
+                - hs-threadripper-runner-abb
+        stage: test
+        script:
+                - git clone git@gitlab.denx.de:abb/tbot-tbot2go.git
+                - cd tbot-tbot2go
+                - git checkout aristainetos
+                - tbot --version
+                - tbot @argsaristainetos -C ${PWD} -vv ari_ub_basic_checks
