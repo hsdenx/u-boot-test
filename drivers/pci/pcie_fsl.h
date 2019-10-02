@@ -47,6 +47,7 @@ struct fsl_pcie_data {
 	u32 block_offset;		/* Offset from CCSR of 1st controller */
 	u32 block_offset_mask;		/* Mask out the CCSR base */
 	u32 stride;			/* Offset stride between controllers */
+	int ispci;			/* if PCI only */
 };
 
 struct fsl_pcie {

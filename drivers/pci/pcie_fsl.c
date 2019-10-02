@@ -23,6 +23,7 @@ static int fsl_pcie_link_up(struct fsl_pcie *pcie);
 static int fsl_pcie_addr_valid(struct fsl_pcie *pcie, pci_dev_t bdf)
 {
 	struct udevice *bus = pcie->bus;
+	struct fsl_pcie_data *info = pcie->info;
 
 	if (!pcie->enabled)
 		return -ENXIO;
@@ -32,6 +33,9 @@ static int fsl_pcie_addr_valid(struct fsl_pcie *pcie, pci_dev_t bdf)
 
 	if (PCI_BUS(bdf) == (bus->seq + 1) && (PCI_DEV(bdf) > 0))
 		return -EINVAL;
+
+	if (info->ispci)
+		return 0;
 
 	if (PCI_BUS(bdf) > bus->seq && (!fsl_pcie_link_up(pcie) || pcie->mode))
 		return -EINVAL;
@@ -161,8 +165,12 @@ static int fsl_pcie_hose_write_config_dword(struct fsl_pcie *pcie, uint offset,
 
 static int fsl_pcie_link_up(struct fsl_pcie *pcie)
 {
+	struct fsl_pcie_data *info = pcie->info;
 	ccsr_fsl_pci_t *regs = pcie->regs;
 	u16 ltssm;
+
+	if (info->ispci)
+		return 1;
 
 	if (pcie->block_rev >= PEX_IP_BLK_REV_3_0) {
 		ltssm = (in_be32(&regs->pex_csr0)
@@ -251,6 +259,7 @@ static int fsl_pcie_setup_inbound_win(struct fsl_pcie *pcie, int idx,
 				      bool pf, u64 phys, u64 bus_addr,
 				      pci_size_t size)
 {
+	struct fsl_pcie_data *info = pcie->info;
 	ccsr_fsl_pci_t *regs = pcie->regs;
 	pit_t *pi = &regs->pit[idx];
 	u32 sz = (__ilog2_u64(size) - 1);
@@ -275,6 +284,10 @@ static int fsl_pcie_setup_inbound_win(struct fsl_pcie *pcie, int idx,
 	flag |= PIWAR_EN | PIWAR_READ_SNOOP | PIWAR_WRITE_SNOOP;
 	if (pf)
 		flag |= PIWAR_PF;
+
+	if (info->ispci)
+		flag |= PIWAR_MEM_2G;
+
 	out_be32(&pi->piwar, flag | sz);
 
 	return 0;
@@ -508,6 +521,7 @@ static int fsl_pcie_init_ep(struct fsl_pcie *pcie)
 static int fsl_pcie_probe(struct udevice *dev)
 {
 	struct fsl_pcie *pcie = dev_get_priv(dev);
+	struct fsl_pcie_data *info = pcie->info;
 	ccsr_fsl_pci_t *regs = pcie->regs;
 	u16 val_16;
 
@@ -515,7 +529,10 @@ static int fsl_pcie_probe(struct udevice *dev)
 	pcie->block_rev = in_be32(&regs->block_rev1);
 
 	list_add(&pcie->list, &fsl_pcie_list);
-	pcie->enabled = is_serdes_configured(PCIE1 + pcie->idx);
+	if (info->ispci)
+		pcie->enabled = 1;
+	else
+		pcie->enabled = is_serdes_configured(PCIE1 + pcie->idx);
 	if (!pcie->enabled) {
 		printf("PCIe%d: %s disabled\n", pcie->idx, dev->name);
 		return 0;
@@ -579,6 +596,13 @@ static const struct dm_pci_ops fsl_pcie_ops = {
 	.write_config	= fsl_pcie_write_config,
 };
 
+static struct fsl_pcie_data mpc85xx_data = {
+	.block_offset = 0x8000,
+	.block_offset_mask = 0xffff,
+	.stride = 0x1000,
+	.ispci = 1,
+};
+
 static struct fsl_pcie_data p1_p2_data = {
 	.block_offset = 0xa000,
 	.block_offset_mask = 0xffff,
@@ -598,6 +622,7 @@ static struct fsl_pcie_data t2080_data = {
 };
 
 static const struct udevice_id fsl_pcie_ids[] = {
+	{ .compatible = "fsl,mpc8540-pci", .data = (ulong)&mpc85xx_data },
 	{ .compatible = "fsl,pcie-mpc8548", .data = (ulong)&p1_p2_data },
 	{ .compatible = "fsl,pcie-p1_p2", .data = (ulong)&p1_p2_data },
 	{ .compatible = "fsl,pcie-p2041", .data = (ulong)&p2041_data },
