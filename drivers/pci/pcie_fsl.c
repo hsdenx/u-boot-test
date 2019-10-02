@@ -58,21 +58,8 @@ static int fsl_pcie_read_config(struct udevice *bus, pci_dev_t bdf,
 	bdf = bdf - PCI_BDF(bus->seq, 0, 0);
 	val = bdf | (offset & 0xfc) | ((offset & 0xf00) << 16) | 0x80000000;
 	out_be32(&regs->cfg_addr, val);
-
 	sync();
-
-	switch (size) {
-	case PCI_SIZE_8:
-		*valuep = in_8((u8 *)&regs->cfg_data + (offset & 3));
-		break;
-	case PCI_SIZE_16:
-		*valuep = in_le16((u16 *)((u8 *)&regs->cfg_data +
-			  (offset & 2)));
-		break;
-	case PCI_SIZE_32:
-		*valuep = in_le32(&regs->cfg_data);
-		break;
-	}
+	*valuep = pci_conv_32_to_size(in_le32(&regs->cfg_data), offset, size);
 
 	return 0;
 }
@@ -84,9 +71,6 @@ static int fsl_pcie_write_config(struct udevice *bus, pci_dev_t bdf,
 	struct fsl_pcie *pcie = dev_get_priv(bus);
 	ccsr_fsl_pci_t *regs = pcie->regs;
 	u32 val;
-	u8 val_8;
-	u16 val_16;
-	u32 val_32;
 
 	if (fsl_pcie_addr_valid(pcie, bdf))
 		return 0;
@@ -94,23 +78,8 @@ static int fsl_pcie_write_config(struct udevice *bus, pci_dev_t bdf,
 	bdf = bdf - PCI_BDF(bus->seq, 0, 0);
 	val = bdf | (offset & 0xfc) | ((offset & 0xf00) << 16) | 0x80000000;
 	out_be32(&regs->cfg_addr, val);
-
 	sync();
-
-	switch (size) {
-	case PCI_SIZE_8:
-		val_8 = value;
-		out_8((u8 *)&regs->cfg_data + (offset & 3), val_8);
-		break;
-	case PCI_SIZE_16:
-		val_16 = value;
-		out_le16((u16 *)((u8 *)&regs->cfg_data + (offset & 2)), val_16);
-		break;
-	case PCI_SIZE_32:
-		val_32 = value;
-		out_le32(&regs->cfg_data, val_32);
-		break;
-	}
+	out_le32(&regs->cfg_data, pci_conv_size_to_32(0, value, offset, size));
 
 	return 0;
 }
