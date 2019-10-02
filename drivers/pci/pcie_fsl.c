@@ -30,13 +30,13 @@ static int fsl_pcie_addr_valid(struct fsl_pcie *pcie, pci_dev_t bdf)
 	if (PCI_BUS(bdf) < bus->seq)
 		return -EINVAL;
 
+	if (PCI_BUS(bdf) == (bus->seq + 1) && (PCI_DEV(bdf) > 0))
+		return -EINVAL;
+
 	if (PCI_BUS(bdf) > bus->seq && (!fsl_pcie_link_up(pcie) || pcie->mode))
 		return -EINVAL;
 
 	if (PCI_BUS(bdf) == bus->seq && (PCI_DEV(bdf) > 0 || PCI_FUNC(bdf) > 0))
-		return -EINVAL;
-
-	if (PCI_BUS(bdf) == (bus->seq + 1) && (PCI_DEV(bdf) > 0))
 		return -EINVAL;
 
 	return 0;
