@@ -401,6 +401,36 @@ static void aristainetos_bootmode_settings(void)
 	}
 }
 
+#if (CONFIG_SYS_BOARD_VERSION == 5)
+#include <power/regulator.h>
+#include <power/da9063.h>
+/*
+ * On the aristainetos2c boards the PMIC needs to be initialized,
+ * because the Ethernet PHY uses a different regulator that is not
+ * setup per hardware default. This does not influence the other versions
+ * as this regulator isn't used there at all.
+*/
+static int setup_pmic_voltages(void)
+{
+	struct udevice *dev;
+
+	regulator_get_by_devname("bpro", &dev);
+	if (!dev)
+		return -ENODEV;
+
+	regulator_set_current(dev, 1400000);
+	regulator_set_value(dev, 1200000);
+	regulator_set_mode(dev, MODE_AUTO);
+
+	return 0;
+}
+#else
+static int setup_pmic_voltages(void)
+{
+	return 0;
+}
+#endif
+
 int board_late_init(void)
 {
 	struct gpio_desc *desc;
@@ -430,6 +460,10 @@ int board_late_init(void)
 
 	/* eeprom work */
 	aristainetos_eeprom();
+
+	if (setup_pmic_voltages())
+		printf("Error setup PMIC\n");
+
 	return 0;
 }
 
