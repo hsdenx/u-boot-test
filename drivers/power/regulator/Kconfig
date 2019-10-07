@@ -313,3 +313,11 @@ config SPL_DM_REGULATOR_LP873X
 	This enables implementation of driver-model regulator uclass
 	features for REGULATOR LP873X and the family of LP873X PMICs.
 	The driver implements get/set api for: value and enable in SPL.
+
+config DM_REGULATOR_DA9063
+	bool "Enable driver for DA9063 PMIC regulators"
+       depends on PMIC_DA9063
+	---help---
+	This enables implementation of driver-model regulator uclass
+	features for REGULATOR DA9063 PMIC.
+	The driver implements get/set api for: value and enable.
