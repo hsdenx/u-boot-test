@@ -267,3 +267,10 @@ config SPL_PMIC_LP87565
 	help
 	The LP87565 is a PMIC containing a bunch of SMPS.
 	This driver binds the pmic children in SPL.
+
+config PMIC_DA9063
+	bool "Enable driver for Dialog Semiconductor DA9063 regulators"
+	depends on DM_PMIC
+	---help---
+	support the BUCKs and LDOs regulators found on DA9063 PMICs.
+	This driver binds the pmic children.
