@@ -401,7 +401,7 @@ static void aristainetos_bootmode_settings(void)
 	}
 }
 
-#if (CONFIG_SYS_BOARD_VERSION == 5)
+#if 1
 #include <power/regulator.h>
 #include <power/da9063.h>
 /*
