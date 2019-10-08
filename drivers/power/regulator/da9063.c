@@ -459,6 +459,29 @@ static struct da9063_regulator_desc *da9063_get_desc(struct udevice *dev)
 	return NULL;
 }
 
+static void da9063_dump_descriptor(struct da9063_regulator_desc *desc)
+{
+	int i;
+
+	printf("Desc: %s pointer: %p\n", desc->name, desc);
+	printf("min_uV: %d\n", desc->min_uV);
+	printf("uV_step: %d\n", desc->uV_step);
+	printf("n_voltages: %d\n", desc->n_voltages);
+	printf("vsel_reg: %x\n", desc->vsel_reg);
+	printf("vsel_mask: %x\n", desc->vsel_mask);
+	printf("csel_reg: %x\n", desc->csel_reg);
+	printf("csel_mask: %x\n", desc->csel_mask);
+	printf("eanble_reg: %x\n", desc->enable_reg);
+	printf("enable_mask: %x\n", desc->enable_mask);
+	printf("mode reg: %x\n", desc->mode_reg);
+	printf("mode mask: %x\n", desc->mode_mask);
+	printf("linear_min_sel: %d\n", desc->linear_min_sel);
+	printf("current Limits:\n");
+	for (i = 0; i < desc->n_current_limits; i++)
+		printf("%d : %d\n", i, desc->curr_table[i]);
+	printf("\n");
+}
+
 static int da9063_ldo_regulator_probe(struct udevice *dev)
 {
 	struct da9063_regulator_platdata *plat = dev_get_platdata(dev);
@@ -470,6 +493,7 @@ static int da9063_ldo_regulator_probe(struct udevice *dev)
 
 	plat->desc = desc;
 	desc->type = REGULATOR_TYPE_LDO;
+	da9063_dump_descriptor(desc);
 	return 0;
 }
 
@@ -504,6 +528,7 @@ static int da9063_buck_regulator_probe(struct udevice *dev)
 
 	plat->desc = desc;
 	desc->type = REGULATOR_TYPE_BUCK;
+	da9063_dump_descriptor(desc);
 
 	uc_pdata = dev_get_uclass_platdata(dev);
 	uc_pdata->mode = da9063_modes;

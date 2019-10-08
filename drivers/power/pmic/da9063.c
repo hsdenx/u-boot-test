@@ -41,12 +41,18 @@ static int da9063_set_page(struct udevice *dev, uint reg)
 static int da9063_write(struct udevice *dev, uint reg, const uint8_t *buf,
 			int len)
 {
+	int i;
 	int ret;
 
 	/* set page */
 	ret = da9063_set_page(dev, reg);
 	if (ret)
 		return ret;
+
+	printf("%s: reg: %x buf: ", __func__, reg);
+	for (i = 0; i < len; i++)
+		printf("%x ", buf[i]);
+	printf(" len: %d\n", len);
 
 	if (dm_i2c_write(dev, reg, buf, len)) {
 		pr_err("write error to device: %p register: %#x!\n", dev, reg);
@@ -58,6 +64,7 @@ static int da9063_write(struct udevice *dev, uint reg, const uint8_t *buf,
 
 static int da9063_read(struct udevice *dev, uint reg, uint8_t *buf, int len)
 {
+	int i;
 	int ret;
 
 	/* set page */
@@ -65,10 +72,15 @@ static int da9063_read(struct udevice *dev, uint reg, uint8_t *buf, int len)
 	if (ret)
 		return ret;
 
+	printf("%s: reg: %x buf: ", __func__, reg);
 	if (dm_i2c_read(dev, reg, buf, len)) {
 		pr_err("read error from device: %p register: %#x!\n", dev, reg);
 		return -EIO;
 	}
+
+	for (i = 0; i < len; i++)
+		printf("%x ", buf[i]);
+	printf(" len: %d\n", len);
 
 	return 0;
 }
