@@ -161,9 +161,9 @@ matrix:
   include:
   # we need to build by vendor due to 50min time limit for builds
   # each env setting here is a dedicated build
-    - name: "buildman arm926ejs aristainetos"
+    - name: "buildman aristainetos"
       env:
-        - JOB="arm926ejs"
-          BUILDMAN="arm926ejs --board aristainetos"
+        - JOB="aristainetos"
+          BUILDMAN="--boards aristainetos2"
 
 # TODO make it perfect ;-r
