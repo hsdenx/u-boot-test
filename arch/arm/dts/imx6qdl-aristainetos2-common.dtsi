@@ -281,6 +281,35 @@
 	status = "okay";
 };
 
+&gpio7 {
+	bootsel0 {
+		gpio-hog;
+		input;
+		gpios = <6 GPIO_ACTIVE_HIGH>;
+	};
+	bootsel1 {
+		gpio-hog;
+		input;
+		gpios = <7 GPIO_ACTIVE_HIGH>;
+	};
+	bootsel2 {
+		gpio-hog;
+		input;
+		gpios = <1 GPIO_ACTIVE_HIGH>;
+	};
+	soft_reset {
+		gpio-hog;
+		output-high;
+		gpios = <13 GPIO_ACTIVE_HIGH>;
+	};
+	sd2_driver_ena {
+		gpio-hog;
+		output-high;
+		gpios = <8 GPIO_ACTIVE_HIGH>;
+	};
+
+};
+
 &gpmi {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gpmi_nand>;
