@@ -159,6 +159,8 @@ endif
 else
 ifeq ($(CONFIG_OF_SEPARATE),y)
 ALL-y += u-boot-dtb.imx
+else ifeq ($(CONFIG_MULTI_DTB_FIT),y)
+ALL-y += u-boot-dtb.imx
 else
 ALL-y += u-boot.imx
 endif
