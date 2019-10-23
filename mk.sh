@@ -66,6 +66,7 @@ fi
 for DNAME in $CONFIGS
 do
 	BDIR=/work/hs/compile/u-boot/$DNAME
+	#BDIR=/home/hs/temp/compile/$DNAME
 	echo BDIR: $BDIR
 
 	if [ $REPROBUILD == "yes" ]; then
@@ -89,7 +90,9 @@ do
 		SOURCE_DATE_EPOCH=0 KCFLAGS=-Werror make O=$BDIR -j8 all
 	else
 		# treat warnings as errors
-		KCFLAGS=-Werror make O=$BDIR -j8 V=1 all
+		#KCFLAGS=-Werror make O=$BDIR -j8 u-boot-dtb.imx
+		#KCFLAGS=-Werror make O=$BDIR -j8 V=1 u-boot-dtb.imx
+		LANG=en_GB.utf8 KCFLAGS=-Werror make O=$BDIR -j8 V=1 all
 		#KCFLAGS=-Werror make O=$BDIR -j8 all
 	fi
 	if [ $? -ne 0 ]; then
