@@ -79,6 +79,26 @@ int dm_gpio_lookup_name(const char *name, struct gpio_desc *desc)
 		if (!strncasecmp(name, uc_priv->bank_name, len)) {
 			if (!strict_strtoul(name + len, 10, &offset))
 				break;
+		} else {
+			/*
+			 * if we did not found a gpio through its bank
+			 * name, we search for a valid gpio label.
+			 */
+			bool found = 0;
+
+			len = strlen(name);
+			for (offset = 0; offset < uc_priv->gpio_count;
+			     offset++) {
+				if (!uc_priv->name[offset])
+					continue;
+				if (!strncmp(name, uc_priv->name[offset],
+					     len)) {
+					found = 1;
+					break;
+				}
+			}
+			if (found)
+				break;
 		}
 	}
 
