@@ -308,6 +308,113 @@ static int env_sf_init(void)
 }
 #endif
 
+#if defined(CONFIG_ENV_SPI_EARLY)
+static int env_sf_init_early(void)
+{
+	int ret;
+	int read1_fail;
+	int crc1_ok;
+#ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+	int crc2_ok;
+	int read2_fail;
+#endif
+
+	/*
+	 * if malloc is not ready yet, we cannot use
+	 * this part yet.
+	 */
+	if (!gd->malloc_limit)
+		return -ENOENT;
+
+	env_t *tmp_env2 = NULL;
+	env_t *tmp_env1;
+
+	tmp_env1 = (env_t *)memalign(ARCH_DMA_MINALIGN,
+			CONFIG_ENV_SIZE);
+#ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+	tmp_env2 = (env_t *)memalign(ARCH_DMA_MINALIGN,
+			CONFIG_ENV_SIZE);
+#endif
+	if (!tmp_env1 || !tmp_env2)
+		goto out;
+
+	ret = setup_flash_device();
+	if (ret)
+		goto out;
+
+	read1_fail = spi_flash_read(env_flash, CONFIG_ENV_OFFSET,
+				    CONFIG_ENV_SIZE, tmp_env1);
+	crc1_ok = crc32(0, tmp_env1->data, ENV_SIZE) ==
+			tmp_env1->crc;
+#ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+	read2_fail = spi_flash_read(env_flash, CONFIG_ENV_OFFSET_REDUND,
+				    CONFIG_ENV_SIZE, tmp_env2);
+	crc2_ok = crc32(0, tmp_env2->data, ENV_SIZE) ==
+			tmp_env2->crc;
+	if (read1_fail && read2_fail) {
+		goto err_read;
+	} else if (!read1_fail && read2_fail) {
+		if (!crc1_ok)
+			goto err_read;
+		gd->env_valid = ENV_VALID;
+	} else if (read1_fail && !read2_fail) {
+		if (!crc2_ok)
+			goto err_read;
+		gd->env_valid = ENV_REDUND;
+	} else {
+		/* both environments read */
+		if (!crc1_ok && !crc2_ok) {
+			goto err_read;
+		} else if (crc1_ok && !crc2_ok) {
+			gd->env_valid = ENV_VALID;
+		} else if (!crc1_ok && crc2_ok) {
+			gd->env_valid = ENV_REDUND;
+		} else {
+			/* both ok - check serial */
+			if (tmp_env1->flags == 255 && tmp_env2->flags == 0)
+				gd->env_valid = ENV_REDUND;
+			else if (tmp_env2->flags == 255 && tmp_env1->flags == 0)
+				gd->env_valid = ENV_VALID;
+			else if (tmp_env1->flags > tmp_env2->flags)
+				gd->env_valid = ENV_VALID;
+			else if (tmp_env2->flags > tmp_env1->flags)
+				gd->env_valid = ENV_REDUND;
+			else /* flags are equal - almost impossible */
+				gd->env_valid = ENV_VALID;
+		}
+	}
+	if (gd->env_valid == ENV_VALID)
+		gd->env_addr = (unsigned long)&tmp_env1->data;
+	else
+		gd->env_addr = (unsigned long)&tmp_env2->data;
+
+#else
+	if (read1_fail)
+		goto err_read;
+
+	/* check crc */
+	if (!crc1_ok)
+		goto err_read;
+
+		/* if valid -> this is our env */
+	gd->env_valid = ENV_VALID;
+	gd->env_addr = tmp_env1;
+#endif
+
+	return 0;
+err_read:
+	spi_flash_free(env_flash);
+	env_flash = NULL;
+	free(tmp_env1);
+#ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+	free(tmp_env2);
+#endif
+out:
+	/* return ENOENT else U-Boot will hang */
+	return -ENOENT;
+}
+#endif
+
 U_BOOT_ENV_LOCATION(sf) = {
 	.location	= ENVL_SPI_FLASH,
 	ENV_NAME("SPI Flash")
@@ -317,5 +424,7 @@ U_BOOT_ENV_LOCATION(sf) = {
 #endif
 #if defined(INITENV) && defined(CONFIG_ENV_ADDR)
 	.init		= env_sf_init,
+#elif defined(CONFIG_ENV_SPI_EARLY)
+	.init		= env_sf_init_early,
 #endif
 };
