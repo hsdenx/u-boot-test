@@ -183,9 +183,12 @@ matrix:
     - name: "buildman ARM bcm"
       env:
         - BUILDMAN="bcm -x mips"
-    - name: "buildman NXP ARM32"
+    - name: "buildman NXP ARM32 ls10"
       env:
-        - BUILDMAN="freescale -x powerpc,m68k,aarch64"
+        - BUILDMAN="freescale&ls10 -x powerpc,m68k,aarch64"
+    - name: "buildman NXP ARM32 catch-all"
+      env:
+        - BUILDMAN="freescale -x powerpc,m68k,aarch64,ls10"
     - name: "buildman NXP AArch64 LS101x"
       env:
         - BUILDMAN="freescale&aarch64&ls101"
