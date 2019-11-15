@@ -240,9 +240,12 @@ matrix:
     - name: "buildman 64bit sun8i"
       env:
         - BUILDMAN="sun8i&aarch64"
-    - name: "buildman 32bit sun8i"
+    - name: "buildman 32bit sun8i orangepi"
       env:
-        - BUILDMAN="sun8i&armv7"
+        - BUILDMAN="sun8i&armv7&orangepi"
+    - name: "buildman 32bit sun8i catch-all"
+      env:
+        - BUILDMAN="sun8i&armv7 -x orangepi"
     - name: "buildman sun9i"
       env:
         - BUILDMAN="sun9i"
