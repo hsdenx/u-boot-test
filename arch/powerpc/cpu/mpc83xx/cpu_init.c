@@ -11,6 +11,9 @@
 #ifdef CONFIG_USB_EHCI_FSL
 #include <usb/ehci-ci.h>
 #endif
+#ifdef CONFIG_QE
+#include <fsl_qe.h>
+#endif
 
 #include "lblaw/lblaw.h"
 #include "elbc/elbc.h"
@@ -27,6 +30,7 @@ extern void qe_config_iopin(u8 port, u8 pin, int dir,
 extern void qe_init(uint qe_base);
 extern void qe_reset(void);
 
+#if !defined(CONFIG_PINCTRL)
 static void config_qe_ioports(void)
 {
 	u8	port, pin;
@@ -42,6 +46,7 @@ static void config_qe_ioports(void)
 		qe_config_iopin(port, pin, dir, open_drain, assign);
 	}
 }
+#endif
 #endif
 
 /*
@@ -189,10 +194,13 @@ void cpu_init_f (volatile immap_t * im)
 	__raw_writel(CONFIG_SYS_OBIR, &im->sysconf.obir);
 #endif
 
+#if !defined(CONFIG_PINCTRL)
 #ifdef CONFIG_QE
 	/* Config QE ioports */
 	config_qe_ioports();
 #endif
+#endif
+
 	/* Set up preliminary BR/OR regs */
 	init_early_memctl_regs();
 
