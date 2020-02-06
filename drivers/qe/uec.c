@@ -18,6 +18,7 @@
 #include <fsl_qe.h>
 #include <phy.h>
 
+#if !defined(CONFIG_DM_ETH)
 /* Default UTBIPAR SMI address */
 #ifndef CONFIG_UTBIPAR_INIT_TBIPA
 #define CONFIG_UTBIPAR_INIT_TBIPA 0x1F
@@ -1428,3 +1429,4 @@ int uec_standard_init(bd_t *bis)
 {
 	return uec_eth_init(bis, uec_info, ARRAY_SIZE(uec_info));
 }
+#endif
