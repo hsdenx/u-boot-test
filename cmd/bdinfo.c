@@ -216,7 +216,9 @@ int do_bdinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	print_num("relocaddr", gd->relocaddr);
 	board_detail();
 	print_cpu_word_size();
-
+	print_num("fdt_blob", (ulong)gd->fdt_blob);
+	print_num("new_fdt", (ulong)gd->new_fdt);
+	print_num("fdt_size", (ulong)gd->fdt_size);
 	return 0;
 }
 
