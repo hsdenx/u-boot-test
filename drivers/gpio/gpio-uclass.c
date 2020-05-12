@@ -572,6 +572,9 @@ static int _dm_gpio_set_dir_flags(struct gpio_desc *desc, ulong flags)
 		return ret;
 	}
 
+	/* save the flags also in descriptor */
+	desc->flags = flags;
+
 	/* GPIOD_ are directly managed by driver in set_dir_flags*/
 	if (ops->set_dir_flags) {
 		ret = ops->set_dir_flags(dev, desc->offset, flags);
