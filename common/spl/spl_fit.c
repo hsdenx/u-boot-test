@@ -694,7 +694,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	if (spl_load_simple_fit_skip_processing())
 		return 0;
 
-	ctx.fit = spl_load_simple_fit_fix_load(ctx.fit);
+	ctx.fit = spl_load_simple_fit_fix_load((void *)ctx.fit);
 
 	ret = spl_simple_fit_parse(&ctx);
 	if (ret < 0)
