@@ -334,6 +334,17 @@ void board_spl_fit_post_load(const void *fit)
 }
 #endif
 
+#if defined(CONFIG_FIT_EXTERNAL_OFFSET)
+void *board_spl_fit_buffer_addr(ulong fit_size, int bl_len)
+{
+	/*
+	 * use fix position
+	 * TEXT_BASE - FIT_EXTERNAL_OFFSET
+	 */
+	return  (void *)((CONFIG_SYS_TEXT_BASE - CONFIG_FIT_EXTERNAL_OFFSET));
+}
+#endif
+
 #endif
 
 #if defined(CONFIG_MX6) && defined(CONFIG_SPL_OS_BOOT)
