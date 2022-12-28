@@ -1201,29 +1201,28 @@ endif
 u-boot.bin: u-boot-fit-dtb.bin FORCE
 	$(call if_changed,copy)
 
+ifneq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR)$(CONFIG_OF_SEPARATE),yy)
 ifneq ($(CONFIG_TARGET_SOCRATES),y)
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
+endif
 endif
 
 else ifeq ($(CONFIG_OF_SEPARATE).$(CONFIG_OF_OMIT_DTB),y.)
+
+ifneq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR)$(CONFIG_OF_SEPARATE),yy)
 ifneq ($(CONFIG_TARGET_SOCRATES),y)
 u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,cat)
 endif
+endif
 
-ifneq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR)$(CONFIG_OF_SEPARATE),yy)
-ifneq ($(CONFIG_TARGET_SOCRATES),y)
 u-boot.bin: u-boot-dtb.bin FORCE
 	$(call if_changed,copy)
-endif
-endif
 
-else ifneq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR)$(CONFIG_OF_SEPARATE),yy)
-ifneq ($(CONFIG_TARGET_SOCRATES),y)
+else
 u-boot.bin: u-boot-nodtb.bin FORCE
 	$(call if_changed,copy)
-endif
 endif
 
 # we call Makefile in arch/arm/mach-imx which
@@ -1603,14 +1602,14 @@ u-boot-with-nand-spl.sfp: u-boot-spl-padx4.sfp u-boot.img FORCE
 endif
 
 ifeq ($(CONFIG_MPC85XX_HAVE_RESET_VECTOR)$(CONFIG_OF_SEPARATE),yy)
-u-boot.bin: u-boot-nodtb.bin u-boot.dtb u-boot-br.bin FORCE
+u-boot-dtb.bin: u-boot-nodtb.bin u-boot.dtb u-boot-br.bin FORCE
 	$(call if_changed,binman)
 
 OBJCOPYFLAGS_u-boot-br.bin := -O binary -j .bootpg -j .resetvec
 u-boot-br.bin: u-boot FORCE
 	$(call if_changed,objcopy)
 else ifeq ($(CONFIG_TARGET_SOCRATES),y)
-u-boot.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
+u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
 	$(call if_changed,binman)
 endif
 
