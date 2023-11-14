@@ -983,7 +983,11 @@ static int omap_select_ecc_scheme(struct nand_chip *nand,
 		nand->ecc.strength	= 8;
 		nand->ecc.size		= SECTOR_BYTES;
 		nand->ecc.bytes		= 14;
+#if defined(CONFIG_SPL_BUILD)
+		nand->ecc.hwctl		= omap_enable_hwecc;
+#else
 		nand->ecc.hwctl		= omap_enable_hwecc_bch;
+#endif
 		nand->ecc.correct	= omap_correct_data_bch;
 		nand->ecc.calculate	= omap_calculate_ecc_bch;
 		nand->ecc.read_page	= omap_read_page_bch;
