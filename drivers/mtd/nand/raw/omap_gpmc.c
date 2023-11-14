@@ -637,13 +637,13 @@ static int omap_correct_data_bch(struct mtd_info *mtd, uint8_t *dat,
 	uint32_t error_count = 0, error_max;
 	uint32_t error_loc[ELM_MAX_ERROR_COUNT];
 	enum bch_level bch_type;
-	uint32_t i, ecc_flag = 0;
+	uint32_t i;
 	uint8_t count;
 	uint32_t byte_pos, bit_pos;
 	int err = 0;
 
 	/* check calculated ecc */
-	for (i = 0; i < ecc->bytes && !ecc_flag; i++) {
+	for (i = 0; i < ecc->bytes; i++) {
 		if (calc_ecc[i] != 0x00)
 			goto not_ecc_match;
 	}
