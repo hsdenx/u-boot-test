@@ -428,6 +428,13 @@ config WDT_ARM_SMC
 	  Select this to enable Arm SMC watchdog timer. This watchdog will manage
 	  a watchdog based on ARM SMCCC communication.
 
+config WDT_SCU_PMIC
+	bool "Enable PMIC Watchdog Timer support for siemens platforms"
+	depends on IMX8 && WDT
+	help
+	  Select this to enable the PMIC watchdog driver controlled via
+	  IMX8 SCU API found on Siemens platforms.
+
 config SPL_WDT
 	bool "Enable driver model for watchdog timer drivers in SPL"
 	depends on SPL_DM
