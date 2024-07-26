@@ -428,6 +428,13 @@ config WDT_ARM_SMC
 	  Select this to enable Arm SMC watchdog timer. This watchdog will manage
 	  a watchdog based on ARM SMCCC communication.
 
+config WDT_IMX_SCU
+	bool "Enable external Watchdog Timer support for IMX"
+	depends on IMX8 && WDT
+	help
+	  Select this to enable the external IMX watchdog driver
+	  controlled via IMX8 SCU.
+
 config SPL_WDT
 	bool "Enable driver model for watchdog timer drivers in SPL"
 	depends on SPL_DM
