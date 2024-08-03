@@ -115,6 +115,7 @@ config TARGET_SNIPER
 	select OMAP3_GPIO_5
 	select OMAP3_GPIO_6
 	imply CMD_DM
+	imply OF_UPSTREAM
 
 endchoice
 
