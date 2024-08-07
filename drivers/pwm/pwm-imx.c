@@ -14,6 +14,10 @@
 #include <asm/io.h>
 #include <clk.h>
 
+#if !defined(CFG_IMX6_PWM_PER_CLK)
+#define CFG_IMX6_PWM_PER_CLK	66000000
+#endif
+
 int pwm_config_internal(struct pwm_regs *pwm, unsigned long period_cycles,
 			unsigned long duty_cycles, unsigned long prescale)
 {
@@ -159,7 +163,11 @@ int pwm_dm_imx_get_parms(struct imx_pwm_priv *priv, int period_ns,
 {
 	unsigned long long c;
 
-	c = clk_get_rate(&priv->per_clk);
+	if (CONFIG_IS_ENABLED(CLK))
+		c = clk_get_rate(&priv->per_clk);
+	else
+		c = CFG_IMX6_PWM_PER_CLK;
+
 	c = c * period_ns;
 	do_div(c, 1000000000);
 	*period_c = c;
@@ -226,43 +234,45 @@ static int imx_pwm_set_enable(struct udevice *dev, uint channel, bool enable)
 
 static int imx_pwm_of_to_plat(struct udevice *dev)
 {
-	int ret;
+	int __maybe_unused ret;
 	struct imx_pwm_priv *priv = dev_get_priv(dev);
 
 	priv->regs = dev_read_addr_ptr(dev);
 
-	ret = clk_get_by_name(dev, "per", &priv->per_clk);
-	if (ret) {
-		printf("Failed to get per_clk\n");
-		return ret;
-	}
+	if (CONFIG_IS_ENABLED(CLK)) {
+		ret = clk_get_by_name(dev, "per", &priv->per_clk);
+		if (ret) {
+			printf("Failed to get per_clk\n");
+			return ret;
+		}
 
-	ret = clk_get_by_name(dev, "ipg", &priv->ipg_clk);
-	if (ret) {
-		printf("Failed to get ipg_clk\n");
-		return ret;
+		ret = clk_get_by_name(dev, "ipg", &priv->ipg_clk);
+		if (ret) {
+			printf("Failed to get ipg_clk\n");
+			return ret;
+		}
 	}
-
 	return 0;
 }
 
 static int imx_pwm_probe(struct udevice *dev)
 {
-	int ret;
+	int __maybe_unused ret;
 	struct imx_pwm_priv *priv = dev_get_priv(dev);
 
-	ret = clk_enable(&priv->per_clk);
-	if (ret) {
-		printf("Failed to enable per_clk\n");
-		return ret;
-	}
+	if (CONFIG_IS_ENABLED(CLK)) {
+		ret = clk_enable(&priv->per_clk);
+		if (ret) {
+			printf("Failed to enable per_clk\n");
+			return ret;
+		}
 
-	ret = clk_enable(&priv->ipg_clk);
-	if (ret) {
-		printf("Failed to enable ipg_clk\n");
-		return ret;
+		ret = clk_enable(&priv->ipg_clk);
+		if (ret) {
+			printf("Failed to enable ipg_clk\n");
+			return ret;
+		}
 	}
-
 	return 0;
 }
 
