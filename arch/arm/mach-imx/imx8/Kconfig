@@ -60,6 +60,7 @@ config TARGET_CAPRICORN
 	select BOARD_LATE_INIT
 	select FACTORYSET
 	select IMX8QXP
+	select ARCH_MISC_INIT
 
 config TARGET_IMX8QM_MEK
 	bool "Support i.MX8QM MEK board"
