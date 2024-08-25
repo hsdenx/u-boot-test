@@ -17,6 +17,22 @@
 		stdout-path = &lpuart2;
 	};
 
+	/* remove DMA for console */
+	lpuart2: serial@5a080000 {
+		power-domains = <&pd_dma_lpuart2>;
+		dma-names = "";
+		dmas = <0>;
+	};
+
+	/* create device for u-boot wdt command */
+	scu-wdt {
+		compatible = "siemens,scu-wdt";
+	};
+
+};
+
+&A35_0 {
+	bootph-all;
 };
 
 &iomuxc {
