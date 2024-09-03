@@ -13,6 +13,10 @@
 	bootph-all;
 };
 
+&fec2 {
+	bootph-all;
+};
+
 &clk {
 	bootph-all;
 };
