@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <cyclic.h>
 #include <dm/ofnode.h>
+#include <linux/uapi/linux/uleds.h>
 
 /**
  * DOC: Overview
@@ -86,6 +87,7 @@ struct led_sw_blink {
 struct led_uc_plat {
 	const char *label;
 	enum led_state_t default_state;
+	char name[LED_MAX_NAME_SIZE];
 #ifdef CONFIG_LED_SW_BLINK
 	struct led_sw_blink *sw_blink;
 #endif
