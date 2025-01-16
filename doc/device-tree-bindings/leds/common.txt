@@ -4,6 +4,21 @@ Optional properties for child nodes:
 - label : The label for this LED.  If omitted, the label is
   taken from the node name (excluding the unit address).
 
+- function:
+  LED function. Use one of the LED_FUNCTION_* prefixed definitions
+  from the header include/dt-bindings/leds/common.h. If there is no
+  matching LED_FUNCTION available, add a new one.
+
+- color:
+  Color of the LED. Use one of the LED_COLOR_ID_* prefixed definitions from
+  the header include/dt-bindings/leds/common.h. If there is no matching
+  LED_COLOR_ID available, add a new one.
+
+- function-enumerator:
+  optional
+    Integer to be used when more than one instance of the same function is
+    needed, differing only with an ordinal number.
+
 - linux,default-trigger :  This parameter, if present, is a
     string defining the trigger assigned to the LED.  Current triggers are:
      "backlight" - LED will act as a back-light, controlled by the framebuffer
@@ -19,5 +34,18 @@ Examples:
 system-status {
 	label = "Status";
 	linux,default-trigger = "heartbeat";
+	...
+};
+
+led-0 {
+	function = LED_FUNCTION_STATUS;
+	color = <LED_COLOR_ID_RED>;
+	function-enumerator = <20>;
+	...
+};
+
+led-1 {
+	function = LED_FUNCTION_STATUS;
+	color = <LED_COLOR_ID_YELLOW>;
 	...
 };
