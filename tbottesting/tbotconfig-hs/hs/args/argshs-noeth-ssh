@@ -1,0 +1,5 @@
+@tbotconfig/hs/args/argshs-noeth
+-fnopoweroff
+-falways-on
+-fssh
+-fnouboot

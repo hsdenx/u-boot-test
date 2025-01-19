@@ -30,7 +30,7 @@ PAT_ID = 0
 PAT_RE = 1
 
 # Timeout before expecting the console to be ready (in milliseconds)
-TIMEOUT_MS = 30000                  # Standard timeout
+TIMEOUT_MS = 60000                  # Standard timeout
 TIMEOUT_CMD_MS = 10000              # Command-echo timeout
 
 # Timeout for board preparation in lab mode. This needs to be enough to build

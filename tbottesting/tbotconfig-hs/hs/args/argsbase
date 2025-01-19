@@ -1,0 +1,11 @@
+-c
+tbottest.labgeneric
+-c
+tbottest.boardgeneric
+-fdo_power
+-f
+inifile:tbotconfig/hs/tbot.ini
+-f
+boardfile:tbotconfig/hs/cxg3.ini
+-f
+useifconfig
