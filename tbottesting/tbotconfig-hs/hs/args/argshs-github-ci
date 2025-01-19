@@ -1,0 +1,7 @@
+@tbotconfig/hs/args/argshs-noeth
+-f
+buildername:local
+-f
+uuuloader
+-f
+selectableboardname:cxg3

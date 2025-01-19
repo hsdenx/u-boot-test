@@ -1675,6 +1675,11 @@ F:	cmd/broadcom/chimp_boot.c
 F:	cmd/broadcom/nitro_image_load.c
 F:	cmd/broadcom/chimp_handshake.c
 
+TBOTTEST
+M:	Heiko Schocher <hs@nabladev.com>
+S:	Maintained
+F:	tbottesting/*
+
 TDA19988 HDMI ENCODER
 M:	Liviu Dudau <liviu.dudau@foss.arm.com>
 S:	Maintained
