@@ -1,0 +1,24 @@
+README
+======
+
+commandline completions
+-----------------------
+
+	$ source tbottest/completions.sh
+
+log into U-Boot
+---------------
+
+	$ tbottest/newtbot_starter.py @tbotconfig/cxg3/args/argscxg3-noeth tbotconfig.interactive.uboot
+
+bootmodes
+---------
+
+to boot from emmc pass
+
+	-f bootmode:emmc
+
+to boot with NXPs uuu tool in USB SDP mode pass
+
+	-f bootmode:usb
+

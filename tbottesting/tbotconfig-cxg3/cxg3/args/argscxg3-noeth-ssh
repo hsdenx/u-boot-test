@@ -1,0 +1,5 @@
+@tbotconfig/cxg3/args/argscxg3-noeth
+-fnopoweroff
+-falways-on
+-fssh
+-fnouboot
