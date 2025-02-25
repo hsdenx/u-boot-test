@@ -21,7 +21,10 @@
 #define LEDS_BOOST_ADAPTIVE	1
 #define LEDS_BOOST_FIXED	2
 
-/* Standard LED colors */
+/*
+ * Standard LED colors, LED_COLOR_ID_WHITE must be the
+ * first one and start with value 0
+ */
 #define LED_COLOR_ID_WHITE	0
 #define LED_COLOR_ID_RED	1
 #define LED_COLOR_ID_GREEN	2

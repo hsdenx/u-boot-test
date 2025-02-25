@@ -274,7 +274,7 @@ static const char *led_get_function_name(struct udevice *dev)
 	func = dev_read_string(dev, "function");
 	cp = dev_read_u32(dev, "color", &color);
 	// prevent coverity scan error CID 541279: (TAINTED_SCALAR)
-	if (color < LED_COLOR_ID_WHITE || color >= LED_COLOR_ID_MAX)
+	if (color >= LED_COLOR_ID_MAX)
 		cp = -EINVAL;
 
 	if (cp == 0 || func) {
