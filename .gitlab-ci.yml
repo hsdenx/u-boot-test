@@ -27,6 +27,7 @@ stages:
   - testsuites
   - test.py
   - sjg-lab
+  - tbot-lab
   - world build
 
 .buildman_and_testpy_template: &buildman_and_testpy_dfn
@@ -693,3 +694,76 @@ vf2:
   variables:
     ROLE: vf2
   <<: *lab_dfn
+
+tbottest-test-all-boards:
+  stage: tbot-lab
+  before_script:
+    # install tbot dependencies
+    - python -m pip install --upgrade pip
+    - pip3 install --user pytest mypy paramiko termcolor2 pyserial coverage pytest-cov
+    - pip3 list
+    - python3 --version
+    # configure ssh
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_UB_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/staging.key
+    - chmod 600 ~/.ssh/staging.key
+    - git config --global user.email "hs@nabladev.com"
+    - git config --global user.name "Heiko Schocher"
+    - |
+      cat >>~/.ssh/config <<END
+        Host $SSH_UB_HOST
+          HostName $SSH_UB_HOST
+          User $SSH_UB_USER
+          IdentityFile ~/.ssh/staging.key
+          StrictHostKeyChecking no
+
+        Host ubtestinglab
+          HostName ubtestinglab
+          User $SSH_UB_USER
+          ProxyJump $SSH_UB_HOST
+          IdentityFile ~/.ssh/staging.key
+          StrictHostKeyChecking no
+
+      END
+    - export COLUMNS=160
+    - export PYTHONPATH=/home/uboot/.local/lib/python3.10/site-packages
+  script:
+    # install tbot dependencies
+    - python -m pip install --upgrade pip
+    - pip3 install --user pytest mypy paramiko termcolor2 pyserial coverage pytest-cov
+    - pip3 list
+    # Fix warning:
+    # The scripts coverage, coverage-3.10 and coverage3 are installed in '/home/uboot/.local/bin' which is not on PATH.
+    - export PATH=~/.local/bin:$PATH
+    # Fix warning
+    # fatal: detected dubious ownership in repository at '/builds/u-boot/custodians/u-boot-i2c'
+    - git config --global --add safe.directory /builds/u-boot/custodians/u-boot-i2c
+    # now start testing
+    - cd tbottesting
+    - echo "--------------------- test boards ------------------"
+    # set link to tbotconfig data
+    - ln -s tbotconfig-hs tbotconfig
+    # correct path to keyfile
+    - sed -i "s|~/.ssh/id_rsa|~/.ssh/staging.key|g" tbotconfig/hs/tbot.ini
+    # setup tbot
+    - ./preparetbot.sh
+    - returncode=0
+    - set +e
+    - python3 boardtests.py --usetbotflags
+    - exitcode="$?"
+    - echo "exitcode ${exitcode}"
+    - |
+      if [[ "${exitcode}" != "0" ]];then
+          echo "boardtests failed with exitcode ${exitcode}"
+          returncode=1
+      fi
+      exit "${returncode}"
+  artifacts:
+    when: always
+    paths:
+      - "./results/*"
+    reports:
+      # TODO how to report more than one board
+      junit: ./results/cxg3/results.xml
+    expire_in: 1 week
