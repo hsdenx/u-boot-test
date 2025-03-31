@@ -1678,6 +1678,7 @@ F:	cmd/broadcom/chimp_handshake.c
 TBOTTEST
 M:	Heiko Schocher <hs@nabladev.com>
 S:	Maintained
+F:	scripts/getpatchlist.py
 F:	tbottesting/*
 
 TDA19988 HDMI ENCODER
