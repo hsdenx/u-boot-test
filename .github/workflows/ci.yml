@@ -1,0 +1,84 @@
+name: testing boards in U-Boot with tbottest
+
+on:
+  push:
+    branches:
+      - tbottesting
+  pull_request:
+
+jobs:
+  test:
+    name: Testing
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install dependencies, doc-tools
+        run: |
+          python -m pip install --upgrade pip
+          pip3 install --user pytest mypy paramiko termcolor2 pyserial coverage pytest-cov
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.TARGET_HOST }}
+          SSH_USER: ${{ secrets.TARGET_USER }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          echo "SSHUSER: $SSH_USER"
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+            Host $SSH_HOST
+              HostName $SSH_HOST
+              User $SSH_USER
+              IdentityFile ~/.ssh/staging.key
+              StrictHostKeyChecking no
+
+            Host ubtestinglab
+              HostName ubtestinglab
+              User $SSH_USER
+              ProxyJump $SSH_HOST
+              IdentityFile ~/.ssh/staging.key
+              StrictHostKeyChecking no
+
+          END
+      - name: Run U-Boot tests
+        env:
+          SSH_KEY: ${{ secrets.PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.TARGET_HOST }}
+          SSH_USER: ${{ secrets.TARGET_USER }}
+        run: |
+          export COLUMNS=160
+          # for unknown reasons termcolor2 get not found
+          # but Install step shows, that it is installed
+          export PYTHONPATH=/home/runner/.local/lib/python3.10/site-packages
+          # set some git default values so git am works
+          git config --global user.email "hs@nabladev.com"
+          git config --global user.name "Heiko Schocher"
+          # test if ssh works
+          echo "--------------------- try ssh ------------------"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/staging.key ${SSH_HOST} /home/pi/hello.sh
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/staging.key pi@ubtestinglab /home/pi/hello.sh
+          #
+          # now start testing
+          cd tbottesting
+          echo "--------------------- test boards ------------------"
+          # set link to tbotconfig data
+          ln -s tbotconfig-hs tbotconfig
+          # correct path to keyfile
+          sed -i "s|/home/\${username}/.ssh/id_rsa|~/.ssh/staging.key|g" tbotconfig/hs/tbot.ini
+          # setup tbot
+          ./preparetbot.sh
+          returncode=0
+          set +e
+          python3 boardtests.py --usetbotflags
+          exitcode="$?"
+          if [[ "${exitcode}" != "0" ]];then
+            echo "boardtests failed with exitcode ${exitcode}"
+            returncode=1
+          fi
+          exit "${returncode}"
