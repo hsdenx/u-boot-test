@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2019 Siemens AG
+ */
+
+#include "imx8-capricorn.dtsi"
+
+/ {
+	model = "Siemens FS30";
+
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&led_pin>;
+		compatible = "gpio-leds";
+
+		led@0 {
+			label = "led_com1_tx";
+			gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+		led@1 {
+			label = "led_com1_rx";
+			gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+		led@2 {
+			label = "led_com2_tx";
+			gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+		led@3 {
+			label = "led_com2_rx";
+			gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		led@4 {
+			label = "led_com3_tx";
+			gpios = <&gpio3 18 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		led@5 {
+			label = "led_com3_rx";
+			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+	};
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	led_pin: gpioledsgrp {
+		fsl,pins = <
+		SC_P_FLEXCAN1_RX_LSIO_GPIO1_IO17	0x26000061
+		SC_P_FLEXCAN1_TX_LSIO_GPIO1_IO18	0x26000061
+		SC_P_QSPI0B_DATA0_LSIO_GPIO3_IO18	0x26000061
+		SC_P_QSPI0B_DATA1_LSIO_GPIO3_IO19	0x26000061
+		SC_P_SPI3_SDI_LSIO_GPIO0_IO15		0x26000061
+		SC_P_SPI3_CS0_LSIO_GPIO0_IO16		0x26000061
+		>;
+	};
+
+	muxcgrp: imx8qxp-som {
+		pinctrl_fec2: fec2grp {
+			fsl,pins = <
+			SC_P_COMP_CTL_GPIO_1V8_3V3_ENET_ENETB0_PAD	0x000014a0
+			SC_P_COMP_CTL_GPIO_1V8_3V3_ENET_ENETB1_PAD	0x000014a0
+			SC_P_COMP_CTL_GPIO_1V8_3V3_GPIORHB_PAD		0x000514a0
+
+			SC_P_ENET0_MDC_CONN_ENET1_MDC			0x00000060
+			SC_P_ENET0_MDIO_CONN_ENET1_MDIO			0x00000060
+
+			SC_P_ESAI0_FSR_CONN_ENET1_RCLK50M_IN		0x00000060
+			SC_P_SPDIF0_RX_CONN_ENET1_RGMII_RXD0		0x00000060
+			SC_P_ESAI0_TX3_RX2_CONN_ENET1_RGMII_RXD1	0x00000060
+			SC_P_ESAI0_TX2_RX3_CONN_ENET1_RMII_RX_ER	0x00000060
+			SC_P_SPDIF0_TX_CONN_ENET1_RGMII_RX_CTL		0x00000060
+			SC_P_ESAI0_TX4_RX1_CONN_ENET1_RGMII_TXD0	0x00000060
+			SC_P_ESAI0_TX5_RX0_CONN_ENET1_RGMII_TXD1	0x00000060
+			SC_P_ESAI0_SCKR_CONN_ENET1_RGMII_TX_CTL		0x00000060
+			>;
+		};
+	};
+};
+
+&fec2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec2>;
+	phy-mode = "rmii";
+
+	fsl,magic-packet;
+	status = "okay";
+};

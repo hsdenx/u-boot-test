@@ -4,11 +4,15 @@ M:	Heiko Schocher <hs@nabladev.com>
 M:	Walter Schweizer <walter.schweizer@siemens.com>
 S:	Maintained
 F:	arch/arm/dts/imx8-capricorn-cxg3.dts
+F:	arch/arm/dts/imx8-capricorn-fs30.dts
+F:	arch/arm/dts/imx8-capricorn-fs40.dts
 F:	arch/arm/dts/imx8-capricorn-pxc5.dts
 F:	arch/arm/dts/imx8-capricorn-u-boot.dtsi
 F:	arch/arm/dts/imx8-capricorn.dtsi
 F:	board/siemens/capricorn/
 F:	configs/capricorn_cxg3_defconfig
+F:	configs/capricorn_fs30_defconfig
+F:	configs/capricorn_fs40_defconfig
 F:	configs/capricorn_pxc5_defconfig
 F:	configs/imx8qxp_capricorn.config
 F:	include/configs/capricorn-common.h
