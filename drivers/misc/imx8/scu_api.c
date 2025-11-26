@@ -991,7 +991,7 @@ int sc_timer_control_siemens_pmic_wdog(sc_ipc_t ipc, u8 cmd)
 
 	ret = misc_call(dev, SC_FALSE, &msg, size, &msg, size);
 	if (ret)
-		printf("%s: res:%d\n", __func__, RPC_R8(&msg));
+		debug("%s: res:%d\n", __func__, RPC_R8(&msg));
 
 	return ret;
 }
