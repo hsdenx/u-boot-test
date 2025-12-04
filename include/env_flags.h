@@ -56,6 +56,16 @@ enum env_flags_varaccess {
 #define ETHADDR_FLAGS "eth" ETHADDR_WILDCARD "addr:mo,"
 #endif
 #endif
+#ifdef CONFIG_ENV_WRITEABLE_LIST
+#define NET_FLAGS \
+	"ipaddr:iw," \
+	"gatewayip:iw," \
+	"netmask:iw," \
+	"serverip:iw," \
+	"nvlan:dw," \
+	"vlan:dw," \
+	"dnsip:iw,"
+#else
 #define NET_FLAGS \
 	"ipaddr:i," \
 	"gatewayip:i," \
@@ -64,16 +74,24 @@ enum env_flags_varaccess {
 	"nvlan:d," \
 	"vlan:d," \
 	"dnsip:i,"
+#endif
 #else
 #define ETHADDR_FLAGS
 #define NET_FLAGS
 #endif
 
 #ifdef CONFIG_IPV6
+#ifdef CONFIG_ENV_WRITEABLE_LIST
+#define NET6_FLAGS \
+	"ip6addr:sw," \
+	"serverip6:sw," \
+	"gatewayip6:sw,"
+#else
 #define NET6_FLAGS \
 	"ip6addr:s," \
 	"serverip6:s," \
 	"gatewayip6:s,"
+#endif
 #else
 #define NET6_FLAGS
 #endif
