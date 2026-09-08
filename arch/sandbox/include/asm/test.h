@@ -252,6 +252,14 @@ uint sandbox_spi_get_mode(struct udevice *dev);
 uint sandbox_spi_get_wordlen(struct udevice *dev);
 
 /**
+ * sandbox_spi_ram_is_sequential() - check the mode of the emulated SPI SRAM
+ *
+ * @dev:	the emulation device
+ * Return: true if the MODE register selects sequential operation
+ */
+bool sandbox_spi_ram_is_sequential(struct udevice *dev);
+
+/**
  * sandbox_get_pch_spi_protect() - Get the PCI SPI protection status
  *
  * @dev: Device to check

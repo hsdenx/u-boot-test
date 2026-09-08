@@ -259,6 +259,15 @@ config SPI_RAM
 
 	  If unsure, say N
 
+config SPI_RAM_SANDBOX
+	bool "Sandbox emulation of the Microchip 23LCV1024"
+	depends on SANDBOX && SPI_RAM
+	help
+	  Emulate a 23LCV1024 on the sandbox SPI bus, so that the driver can
+	  be exercised by the unit tests. The emulation implements all three
+	  operating modes of the device, which is what makes it able to tell
+	  whether the driver selects the right one.
+
 config SPI_FLASH_USE_4K_SECTORS
 	bool "Use small 4096 B erase sectors"
 	depends on SPI_FLASH
