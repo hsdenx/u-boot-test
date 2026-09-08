@@ -518,6 +518,27 @@ static const struct dm_spi_emul_ops sandbox_sf_emul_ops = {
 };
 
 #ifdef CONFIG_SPI_FLASH
+/**
+ * sandbox_spi_emul_lookup() - find the emulator standing in for a slave
+ *
+ * A slave that is not a SPI NOR flash names the driver that emulates it
+ * in its "sandbox,emul" property. Without that property the flash
+ * emulator is used, which is what every existing node relies on.
+ *
+ * @node:	device tree node of the slave
+ * Return: driver to bind, or NULL if it does not exist
+ */
+static struct driver *sandbox_spi_emul_lookup(ofnode node)
+{
+	const char *name;
+
+	name = ofnode_read_string(node, "sandbox,emul");
+	if (!name)
+		name = "sandbox_sf_emul";
+
+	return lists_driver_lookup_name(name);
+}
+
 int sandbox_sf_bind_emul(struct sandbox_state *state, int busnum, int cs,
 			 struct udevice *bus, ofnode node, const char *spec)
 {
@@ -530,9 +551,9 @@ int sandbox_sf_bind_emul(struct sandbox_state *state, int busnum, int cs,
 	strncpy(name, spec, sizeof(name) - 6);
 	name[sizeof(name) - 6] = '\0';
 	strcat(name, "-emul");
-	drv = lists_driver_lookup_name("sandbox_sf_emul");
+	drv = sandbox_spi_emul_lookup(node);
 	if (!drv) {
-		puts("Cannot find sandbox_sf_emul driver\n");
+		puts("Cannot find SPI emulation driver\n");
 		return -ENOENT;
 	}
 	str = strdup(name);
