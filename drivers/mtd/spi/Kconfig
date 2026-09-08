@@ -248,6 +248,17 @@ config SPI_FLASH_ZBIT
 
 endif
 
+config SPI_RAM
+	bool "Microchip 23LCV1024 SPI SRAM"
+	depends on DM_SPI_FLASH
+	help
+	  Enable support for the Microchip 23LCV1024 serial SRAM, a 1 Mbit
+	  SRAM with battery backup on an SPI bus. The device is registered
+	  with the spi_flash uclass, so it is reachable through the sf
+	  command, and, with SPI_FLASH_MTD enabled, as an MTD device.
+
+	  If unsure, say N
+
 config SPI_FLASH_USE_4K_SECTORS
 	bool "Use small 4096 B erase sectors"
 	depends on SPI_FLASH
