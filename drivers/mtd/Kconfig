@@ -194,6 +194,20 @@ config ALTERA_QSPI
 	  NOR flash to parallel flash interface. Please find details on the
 	  "Embedded Peripherals IP User Guide" of Altera.
 
+config SPI_RAM
+	bool "Microchip 23LCV1024 SPI SRAM"
+	depends on DM_SPI && DM_MTD
+	help
+	  Enable support for the Microchip 23LCV1024 serial SRAM, a 1 Mbit
+	  SRAM with battery backup on an SPI bus. The device is registered
+	  as an MTD device of type MTD_RAM, so the mtd command reaches it.
+
+	  Writing needs no erase, so the driver implements none and the MTD
+	  flags say MTD_NO_ERASE. An erase request is answered with
+	  -EOPNOTSUPP rather than silently doing nothing.
+
+	  If unsure, say N
+
 config RENESAS_RPC_HF
 	bool "Renesas R-Car Gen3 RPC HyperFlash driver"
 	depends on RCAR_64 && DM_MTD

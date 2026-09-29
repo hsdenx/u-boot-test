@@ -1649,6 +1649,11 @@ S:	Maintained
 T:	git https://git.u-boot-project.org/u-boot/custodians/u-boot-nand-flash.git
 F:	drivers/mtd/nand/spi/
 
+SPI RAM
+M:	Heiko Schocher <hs@nabladev.com>
+S:	Maintained
+F:	drivers/mtd/spi_ram.c
+
 SPI-NOR
 M:	Vignesh R <vigneshr@ti.com>
 R:	Takahiro Kuwano <takahiro.kuwano@infineon.com>
