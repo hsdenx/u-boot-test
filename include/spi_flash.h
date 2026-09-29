@@ -136,7 +136,7 @@ struct sandbox_state;
 int sandbox_sf_bind_emul(struct sandbox_state *state, int busnum, int cs,
 			 struct udevice *bus, ofnode node, const char *spec);
 
-void sandbox_sf_unbind_emul(struct sandbox_state *state, int busnum, int cs);
+void sandbox_spi_unbind_emul(struct sandbox_state *state, int busnum, int cs);
 
 #else
 /* Compatibility functions for when DM_SPI_FLASH is disabled */

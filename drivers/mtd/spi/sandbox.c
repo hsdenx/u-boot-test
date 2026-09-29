@@ -26,6 +26,8 @@
 #include <dm/lists.h>
 #include <dm/uclass-internal.h>
 
+#define SANDBOX_SF_EMUL		"sandbox_sf_emul"
+
 /*
  * The different states that our SPI flash transitions between.
  * We need to keep track of this across multiple xfer calls since
@@ -518,39 +520,78 @@ static const struct dm_spi_emul_ops sandbox_sf_emul_ops = {
 };
 
 #ifdef CONFIG_SPI_FLASH
-int sandbox_sf_bind_emul(struct sandbox_state *state, int busnum, int cs,
-			 struct udevice *bus, ofnode node, const char *spec)
+/**
+ * sandbox_spi_emul_lookup() - bind the emulator standing in for a slave
+ *
+ * A slave points at its emulation with a "sandbox,emul" phandle, the way
+ * the I2C and PCI emulations do, and the compatible of that node selects
+ * the driver. Without the property the SPI NOR flash emulator is bound on
+ * the slave's own node, which is what every existing node relies on.
+ *
+ * @bus:	SPI bus the emulator becomes a child of
+ * @node:	device tree node of the slave
+ * @spec:	name of the slave, used to name the flash emulator
+ * @emulp:	returns the bound emulator
+ * Return: 0 on success, negative on error
+ */
+static int sandbox_spi_emul_lookup(struct udevice *bus, ofnode node,
+				   const char *spec, struct udevice **emulp)
 {
-	struct udevice *emul;
+	struct ofnode_phandle_args args;
 	char name[20], *str;
 	struct driver *drv;
 	int ret;
 
-	/* now the emulator */
+	if (!ofnode_parse_phandle_with_args(node, "sandbox,emul", NULL, 0, 0,
+					    &args)) {
+		ret = lists_bind_fdt(bus, args.node, emulp, NULL, false);
+		if (ret)
+			printf("Cannot bind emulator from node '%s' (err=%d)\n",
+			       ofnode_get_name(args.node), ret);
+
+		return ret;
+	}
+
+	drv = lists_driver_lookup_name(SANDBOX_SF_EMUL);
+	if (!drv) {
+		printf("Cannot find SPI emulation driver '%s'\n",
+		       SANDBOX_SF_EMUL);
+		return -ENOENT;
+	}
+
 	strncpy(name, spec, sizeof(name) - 6);
 	name[sizeof(name) - 6] = '\0';
 	strcat(name, "-emul");
-	drv = lists_driver_lookup_name("sandbox_sf_emul");
-	if (!drv) {
-		puts("Cannot find sandbox_sf_emul driver\n");
-		return -ENOENT;
-	}
 	str = strdup(name);
 	if (!str)
 		return -ENOMEM;
-	ret = device_bind(bus, drv, str, NULL, node, &emul);
+
+	ret = device_bind(bus, drv, str, NULL, node, emulp);
 	if (ret) {
 		free(str);
 		printf("Cannot create emul device for spec '%s' (err=%d)\n",
 		       spec, ret);
-		return ret;
 	}
+
+	return ret;
+}
+
+int sandbox_sf_bind_emul(struct sandbox_state *state, int busnum, int cs,
+			 struct udevice *bus, ofnode node, const char *spec)
+{
+	struct udevice *emul;
+	int ret;
+
+	ret = sandbox_spi_emul_lookup(bus, node, spec, &emul);
+	if (ret)
+		return ret;
+
 	state->spi[busnum][cs].emul = emul;
 
 	return 0;
 }
 
-void sandbox_sf_unbind_emul(struct sandbox_state *state, int busnum, int cs)
+void sandbox_spi_unbind_emul(struct sandbox_state *state, int busnum, int cs)
 {
 	struct udevice *dev;
 

@@ -57,7 +57,7 @@ static int dm_test_spi_find(struct unit_test_state *uts)
 	ut_asserteq(-ENOENT, _spi_get_bus_and_cs(busnum, cs, speed, mode,
 						 "jedec_spi_nor", "name", &bus,
 						 &slave));
-	sandbox_sf_unbind_emul(state_get_current(), busnum, cs);
+	sandbox_spi_unbind_emul(state_get_current(), busnum, cs);
 	ut_assertok(spi_cs_info(bus, cs, &info));
 	ut_asserteq_ptr(NULL, info.dev);
 
@@ -84,8 +84,8 @@ static int dm_test_spi_find(struct unit_test_state *uts)
 	 * Since we are about to destroy all devices, we must tell sandbox
 	 * to forget the emulation device
 	 */
-	sandbox_sf_unbind_emul(state_get_current(), busnum, cs);
-	sandbox_sf_unbind_emul(state_get_current(), busnum, cs_b);
+	sandbox_spi_unbind_emul(state_get_current(), busnum, cs);
+	sandbox_spi_unbind_emul(state_get_current(), busnum, cs_b);
 
 	return 0;
 }
@@ -210,7 +210,7 @@ static int dm_test_spi_xfer(struct unit_test_state *uts)
 	 * to forget the emulation device
 	 */
 #if CONFIG_IS_ENABLED(DM_SPI_FLASH)
-	sandbox_sf_unbind_emul(state_get_current(), busnum, cs);
+	sandbox_spi_unbind_emul(state_get_current(), busnum, cs);
 #endif
 
 	return 0;
@@ -249,7 +249,7 @@ static int dm_test_spi_xfer_no_rx_tx(struct unit_test_state *uts)
 	 * to forget the emulation device
 	 */
 #if CONFIG_IS_ENABLED(DM_SPI_FLASH)
-	sandbox_sf_unbind_emul(state_get_current(), busnum, cs);
+	sandbox_spi_unbind_emul(state_get_current(), busnum, cs);
 #endif
 
 	return 0;

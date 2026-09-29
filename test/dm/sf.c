@@ -68,7 +68,7 @@ static int dm_test_spi_flash(struct unit_test_state *uts)
 	 * Since we are about to destroy all devices, we must tell sandbox
 	 * to forget the emulation device
 	 */
-	sandbox_sf_unbind_emul(state_get_current(), 0, 0);
+	sandbox_spi_unbind_emul(state_get_current(), 0, 0);
 
 	return 0;
 }
@@ -96,7 +96,7 @@ static int dm_test_spi_flash_func(struct unit_test_state *uts)
 	 * Since we are about to destroy all devices, we must tell sandbox
 	 * to forget the emulation device
 	 */
-	sandbox_sf_unbind_emul(state_get_current(), 0, 0);
+	sandbox_spi_unbind_emul(state_get_current(), 0, 0);
 
 	return 0;
 }
