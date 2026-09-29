@@ -57,6 +57,7 @@
 		rtc0 = &rtc_0;
 		rtc1 = &rtc_1;
 		spi0 = "/spi@0";
+		spi1 = "/spi@1";
 		testfdt6 = "/e-test";
 		testbus3 = "/some-bus";
 		testfdt0 = "/some-bus/c-test@0";
@@ -1641,6 +1642,42 @@
 			sandbox,filename = "spi.bin";
 			spi-cpol;
 			spi-cpha;
+		};
+	};
+
+	spi@1 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <1 1>;
+		compatible = "sandbox,spi";
+
+		sram@0 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0>;
+			compatible = "microchip,mchp23lcv1024";
+			spi-max-frequency = <20000000>;
+			sandbox,emul = <&spi_ram_emul>;
+
+			spi_ram_emul: emul {
+				compatible = "sandbox,spi-ram-emul";
+			};
+
+			partitions {
+				compatible = "fixed-partitions";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				partition@0 {
+					label = "spi-ram-part0";
+					reg = <0x0 0xa000>;
+				};
+
+				partition@a000 {
+					label = "spi-ram-part1";
+					reg = <0xa000 0x1000>;
+				};
+			};
 		};
 	};
 

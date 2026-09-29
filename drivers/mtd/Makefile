@@ -14,6 +14,7 @@ mtd-$(CONFIG_FLASH_CFI_LEGACY) += jedec_flash.o
 mtd-$(CONFIG_STM32_FLASH) += stm32_flash.o
 mtd-$(CONFIG_RENESAS_RPC_HF) += renesas_rpc_hf.o
 mtd-$(CONFIG_SPI_RAM) += spi_ram.o
+mtd-$(CONFIG_SPI_RAM_SANDBOX) += spi_ram_sandbox.o
 mtd-$(CONFIG_HBMC_AM654) += hbmc-am654.o
 
 # U-Boot build

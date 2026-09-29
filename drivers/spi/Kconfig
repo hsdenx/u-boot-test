@@ -518,7 +518,7 @@ config SANDBOX_SPI
 config SANDBOX_SPI_MAX_BUS
 	int
 	depends on SANDBOX
-	default 1
+	default 2
 
 config SANDBOX_SPI_MAX_CS
 	int

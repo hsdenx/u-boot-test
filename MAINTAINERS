@@ -1653,6 +1653,8 @@ SPI RAM
 M:	Heiko Schocher <hs@nabladev.com>
 S:	Maintained
 F:	drivers/mtd/spi_ram.c
+F:	drivers/mtd/spi_ram_sandbox.c
+F:	test/dm/spi_ram.c
 
 SPI-NOR
 M:	Vignesh R <vigneshr@ti.com>
