@@ -654,7 +654,8 @@ static struct mtd_info *allocate_partition(struct mtd_info *master,
 		slave->_block_isbad = part_block_isbad;
 	if (master->_block_markbad)
 		slave->_block_markbad = part_block_markbad;
-	slave->_erase = part_erase;
+	if (master->_erase)
+		slave->_erase = part_erase;
 	slave->parent = master;
 	slave->offset = part->offset;
 	INIT_LIST_HEAD(&slave->partitions);
