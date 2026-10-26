@@ -252,6 +252,24 @@ uint sandbox_spi_get_mode(struct udevice *dev);
 uint sandbox_spi_get_wordlen(struct udevice *dev);
 
 /**
+ * sandbox_mchp23k256_is_sequential() - check the mode of the emulated SPI SRAM
+ *
+ * @dev:	the emulation device
+ * Return: true if the MODE register selects sequential operation
+ */
+bool sandbox_mchp23k256_is_sequential(struct udevice *dev);
+
+/**
+ * sandbox_mchp23k256_force_byte_mode() - leave the emulated SRAM in byte mode
+ *
+ * The device powers up in sequential operation, so a test that wants to see
+ * the driver select a mode has to put the emulation into another one first.
+ *
+ * @dev:	the emulation device
+ */
+void sandbox_mchp23k256_force_byte_mode(struct udevice *dev);
+
+/**
  * sandbox_get_pch_spi_protect() - Get the PCI SPI protection status
  *
  * @dev: Device to check

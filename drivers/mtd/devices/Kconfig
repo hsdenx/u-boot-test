@@ -15,3 +15,11 @@ config MTD_MCHP23K256
 
 	  If unsure, say N
 
+config MTD_MCHP23K256_SANDBOX
+	bool "Sandbox emulation of the Microchip 23LCV1024"
+	depends on SANDBOX && MTD_MCHP23K256
+	help
+	  Emulate a 23LCV1024 on the sandbox SPI bus, so that the driver can
+	  be exercised by the unit tests. The emulation implements all three
+	  operating modes of the device, which is what makes it able to tell
+	  whether the driver selects the right one.

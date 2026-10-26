@@ -59,6 +59,7 @@
 		rtc0 = &rtc_0;
 		rtc1 = &rtc_1;
 		spi0 = "/spi@0";
+		spi1 = "/spi@1";
 		testfdt6 = "/e-test";
 		testbus3 = "/some-bus";
 		testfdt0 = "/some-bus/c-test@0";
@@ -1710,6 +1711,54 @@
 	spi_eeprom_emul: spi-eeprom-emul {
 		compatible = "sandbox,spi-eeprom";
 		sandbox,size = <2048>;
+	};
+
+	spi@1 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <1 1>;
+		compatible = "sandbox,spi";
+
+		sram@0 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0>;
+			compatible = "microchip,mchp23lcv1024";
+			spi-max-frequency = <20000000>;
+			sandbox,emul = <&mchp23lcv1024_emul>;
+
+			partitions {
+				compatible = "fixed-partitions";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				partition@0 {
+					label = "spi-ram-part0";
+					reg = <0x0 0xa000>;
+				};
+
+				/* An offset no erase block boundary would allow */
+				partition@a001 {
+					label = "spi-ram-part1";
+					reg = <0xa001 0x1000>;
+				};
+			};
+		};
+
+		sram@1 {
+			reg = <1>;
+			compatible = "microchip,mchp23k256";
+			spi-max-frequency = <20000000>;
+			sandbox,emul = <&mchp23k256_emul>;
+		};
+	};
+
+	mchp23lcv1024_emul: mchp23lcv1024-emul {
+		compatible = "sandbox,mchp23lcv1024-emul";
+	};
+
+	mchp23k256_emul: mchp23k256-emul {
+		compatible = "sandbox,mchp23k256-emul";
 	};
 
 	syscon0: syscon@0 {
