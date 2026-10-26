@@ -3,6 +3,7 @@
 config MTD_MCHP23K256
 	bool "Microchip 23K256 and 23LCV1024 SPI SRAM"
 	depends on DM_SPI && DM_MTD
+	select SPI_MEM
 	help
 	  Enable support for the Microchip 23K256 and 23LCV1024 serial SRAMs,
 	  a 32 KiB and a 128 KiB SRAM on an SPI bus, the latter with battery

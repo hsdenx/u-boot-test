@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <dm/device_compat.h>
 #include <spi.h>
+#include <spi-mem.h>
 #include <vsprintf.h>
 #include <linux/bitops.h>
 #include <linux/mtd/mtd.h>
@@ -22,9 +23,6 @@
 
 /* MODE register, bits 7:6 select byte, page or sequential operation */
 #define MCHP23K256_MODE_SEQ		BIT(6)
-
-/* The widest address of the supported parts, in bytes */
-#define MCHP23K256_ADDR_MAX		3
 
 /**
  * struct mchp23_caps - what one supported device looks like
@@ -50,8 +48,10 @@ struct mchp23k256_priv {
 /**
  * mchp23k256_command() - run one read or write command over the whole length
  *
- * Sequential operation was selected during probe, so the device serves a
- * transfer of any length from a single command and the bus is claimed once.
+ * Sequential operation was selected during probe, so the device serves
+ * a transfer of any length from a single command. spi_mem_exec_op()
+ * claims the bus for each operation, so the driver never calls
+ * spi_claim_bus() itself.
  *
  * @dev:	the SRAM device
  * @opcode:	MCHP23K256_CMD_READ or MCHP23K256_CMD_WRITE
@@ -67,26 +67,52 @@ static int mchp23k256_command(struct udevice *dev, u8 opcode, u32 offset,
 	const struct mchp23_caps *caps =
 		(const struct mchp23_caps *)dev_get_driver_data(dev);
 	struct spi_slave *spi = dev_get_parent_priv(dev);
-	u8 cmd[1 + MCHP23K256_ADDR_MAX];
-	uint i;
+	struct spi_mem_op op = SPI_MEM_OP(SPI_MEM_OP_CMD(opcode, 1),
+					  SPI_MEM_OP_ADDR(caps->addr_width,
+							  offset, 1),
+					  SPI_MEM_OP_NO_DUMMY,
+					  SPI_MEM_OP_DATA_IN(0, NULL, 1));
+	const u8 *out = data_out;
+	u8 *in = data_in;
 	int ret;
 
-	cmd[0] = opcode;
-	for (i = 0; i < caps->addr_width; i++)
-		cmd[1 + i] = offset >> (8 * (caps->addr_width - i - 1));
+	if (!in)
+		op.data.dir = SPI_MEM_DATA_OUT;
 
-	ret = spi_claim_bus(spi);
-	if (ret) {
-		dev_dbg(dev, "failed to claim SPI bus: %d\n", ret);
-		return ret;
+	while (len) {
+		op.data.nbytes = len;
+		if (in)
+			op.data.buf.in = in;
+		else
+			op.data.buf.out = out;
+
+		/*
+		 * A controller may move less than asked for in one operation,
+		 * which is what the loop is for. The device takes the address
+		 * of every operation, so the pieces need no order.
+		 */
+		ret = spi_mem_adjust_op_size(spi, &op);
+		if (ret) {
+			dev_dbg(dev, "cannot size the operation: %d\n", ret);
+			return ret;
+		}
+
+		ret = spi_mem_exec_op(spi, &op);
+		if (ret) {
+			dev_dbg(dev, "operation at 0x%llx failed: %d\n",
+				op.addr.val, ret);
+			return ret;
+		}
+
+		op.addr.val += op.data.nbytes;
+		len -= op.data.nbytes;
+		if (in)
+			in += op.data.nbytes;
+		else
+			out += op.data.nbytes;
 	}
 
-	ret = spi_write_then_read(spi, cmd, 1 + caps->addr_width, data_out,
-				  data_in, len);
-
-	spi_release_bus(spi);
-
-	return ret;
+	return 0;
 }
 
 static int mchp23k256_read(struct mtd_info *mtd, loff_t from, size_t len,
@@ -126,21 +152,15 @@ static int mchp23k256_probe(struct udevice *dev)
 	struct mtd_info *mtd = dev_get_uclass_priv(dev);
 	struct mchp23k256_priv *priv = dev_get_priv(dev);
 	struct spi_slave *spi = dev_get_parent_priv(dev);
-	u8 cmd[2];
+	u8 mode = MCHP23K256_MODE_SEQ;
+	struct spi_mem_op op =
+		SPI_MEM_OP(SPI_MEM_OP_CMD(MCHP23K256_CMD_WRITE_STATUS, 1),
+			   SPI_MEM_OP_NO_ADDR,
+			   SPI_MEM_OP_NO_DUMMY,
+			   SPI_MEM_OP_DATA_OUT(sizeof(mode), &mode, 1));
 	int ret;
 
-	ret = spi_claim_bus(spi);
-	if (ret) {
-		dev_dbg(dev, "failed to claim SPI bus: %d\n", ret);
-		return ret;
-	}
-
-	cmd[0] = MCHP23K256_CMD_WRITE_STATUS;
-	cmd[1] = MCHP23K256_MODE_SEQ;
-	ret = spi_write_then_read(spi, cmd, sizeof(cmd), NULL, NULL, 0);
-
-	spi_release_bus(spi);
-
+	ret = spi_mem_exec_op(spi, &op);
 	if (ret) {
 		dev_dbg(dev, "failed to select sequential operation: %d\n",
 			ret);

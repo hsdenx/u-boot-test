@@ -35,6 +35,9 @@
 #define MCHP23_ONE_ADDR		0x100
 #define MCHP23_ONE_DATA_LEN	4
 
+/* What a controller with a limited transfer size would move in one go */
+#define MCHP23_CHUNK		16
+
 /*
  * The second partition in the test device tree. Its offset is not aligned
  * to any erase block size, which does not matter for a device without
@@ -177,6 +180,47 @@ static int dm_test_mchp23k256_small(struct unit_test_state *uts)
 	return 0;
 }
 DM_TEST(dm_test_mchp23k256_small, UTF_SCAN_PDATA | UTF_SCAN_FDT);
+
+/*
+ * A controller that transfers less data than requested must not cause
+ * data loss, which is why the driver loops until all data is transferred.
+ */
+static int dm_test_mchp23k256_chunks(struct unit_test_state *uts)
+{
+	u8 src[MCHP23_LEN], dst[MCHP23_LEN];
+	struct spi_slave *slave;
+	struct udevice *dev;
+	struct mtd_info *mtd;
+	size_t retlen;
+	int i;
+
+	ut_assertok(uclass_get_device_by_ofnode(UCLASS_MTD,
+						ofnode_path(MCHP23_PATH),
+						&dev));
+	mtd = dev_get_uclass_priv(dev);
+
+	/* Stand in for a controller that cannot do the whole transfer */
+	slave = dev_get_parent_priv(dev);
+	slave->max_write_size = MCHP23_CHUNK;
+	slave->max_read_size = MCHP23_CHUNK;
+
+	for (i = 0; i < MCHP23_LEN; i++)
+		src[i] = 0xc0 + i;
+
+	ut_assertok(mtd_write(mtd, MCHP23_OFFSET, MCHP23_LEN, &retlen, src));
+	ut_asserteq(MCHP23_LEN, retlen);
+
+	memset(dst, 0, MCHP23_LEN);
+	ut_assertok(mtd_read(mtd, MCHP23_OFFSET, MCHP23_LEN, &retlen, dst));
+	ut_asserteq(MCHP23_LEN, retlen);
+	ut_asserteq_mem(src, dst, MCHP23_LEN);
+
+	slave->max_write_size = 0;
+	slave->max_read_size = 0;
+
+	return 0;
+}
+DM_TEST(dm_test_mchp23k256_chunks, UTF_SCAN_PDATA | UTF_SCAN_FDT);
 
 static int dm_test_mchp23k256_part(struct unit_test_state *uts)
 {
