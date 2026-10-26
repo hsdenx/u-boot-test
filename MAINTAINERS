@@ -1668,6 +1668,7 @@ M:	Heiko Schocher <hs@nabladev.com>
 S:	Maintained
 F:	drivers/mtd/devices/mchp23k256.c
 F:	drivers/mtd/devices/mchp23k256_sandbox.c
+F:	test/cmd/mtd.c
 F:	test/dm/mchp23k256.c
 
 SPI-NOR

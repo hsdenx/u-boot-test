@@ -53,6 +53,10 @@ static bool mtd_is_aligned_with_min_io_size(struct mtd_info *mtd, u64 size)
 
 static bool mtd_is_aligned_with_block_size(struct mtd_info *mtd, u64 size)
 {
+	/* A device with no erase blocks, a RAM say, has nothing to align to */
+	if (!mtd->erasesize)
+		return true;
+
 	return !do_div(size, mtd->erasesize);
 }
 
@@ -641,6 +645,16 @@ static int do_mtd_erase(struct cmd_tbl *cmdtp, int flag, int argc,
 	mtd = get_mtd_by_name(argv[1]);
 	if (IS_ERR_OR_NULL(mtd))
 		return CMD_RET_FAILURE;
+
+	/*
+	 * The same condition mtd_erase() refuses on. Every step below works
+	 * in units of the erase size, so there is nothing to do here either.
+	 */
+	if (!mtd->erasesize || !mtd->_erase) {
+		printf("%s cannot erase\n", mtd->name);
+		ret = CMD_RET_FAILURE;
+		goto out_put_mtd;
+	}
 
 	scrub = strstr(argv[0], ".dontskipbad");
 
