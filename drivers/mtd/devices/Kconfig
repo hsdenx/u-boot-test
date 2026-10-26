@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-2.0+
+
+config MTD_MCHP23K256
+	bool "Microchip 23K256 and 23LCV1024 SPI SRAM"
+	depends on DM_SPI && DM_MTD
+	help
+	  Enable support for the Microchip 23K256 and 23LCV1024 serial SRAMs,
+	  a 32 KiB and a 128 KiB SRAM on an SPI bus, the latter with battery
+	  backup. The device is registered as an MTD device of type MTD_RAM,
+	  so the mtd command reaches it.
+
+	  Writing needs no erase, so the driver implements none and the MTD
+	  flags say MTD_NO_ERASE. An erase request is answered with
+	  -EOPNOTSUPP rather than silently doing nothing.
+
+	  If unsure, say N
+

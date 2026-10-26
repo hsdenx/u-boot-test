@@ -21,6 +21,7 @@ ifeq ($(CONFIG_XPL_BUILD)$(CONFIG_TPL_BUILD),)
 ifneq ($(mtd-y),)
 obj-y += mtd.o
 endif
+obj-$(CONFIG_MTD_MCHP23K256) += devices/
 obj-y += nand/
 obj-y += onenand/
 obj-y += spi/

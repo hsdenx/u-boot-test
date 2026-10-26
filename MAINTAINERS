@@ -1663,6 +1663,11 @@ S:	Maintained
 T:	git https://git.u-boot-project.org/u-boot/custodians/u-boot-nand-flash.git
 F:	drivers/mtd/nand/spi/
 
+MICROCHIP 23K256/23LCV1024 SPI SRAM
+M:	Heiko Schocher <hs@nabladev.com>
+S:	Maintained
+F:	drivers/mtd/devices/mchp23k256.c
+
 SPI-NOR
 M:	Vignesh R <vigneshr@ti.com>
 R:	Takahiro Kuwano <takahiro.kuwano@infineon.com>
