@@ -563,8 +563,19 @@ static struct mtd_info *allocate_partition(struct mtd_info *master,
 					   const struct mtd_partition *part,
 					   int partno, uint64_t cur_offset)
 {
+	u32 wr_alignment = (master->flags & MTD_NO_ERASE) ? master->writesize :
+							    master->erasesize;
 	struct mtd_info *slave;
+	u32 remainder;
 	char *name;
+	u64 tmp;
+
+	/*
+	 * A master that declares neither of the two sizes leaves nothing to
+	 * align to. Take every offset as aligned instead of dividing by zero.
+	 */
+	if (WARN_ON(!wr_alignment))
+		wr_alignment = 1;
 
 	/* allocate the partition structure */
 	slave = kzalloc(sizeof(*slave), GFP_KERNEL);
@@ -665,9 +676,11 @@ static struct mtd_info *allocate_partition(struct mtd_info *master,
 		slave->offset = cur_offset;
 	if (slave->offset == MTDPART_OFS_NXTBLK) {
 		slave->offset = cur_offset;
-		if (mtd_mod_by_eb(cur_offset, master) != 0) {
-			/* Round up to next erasesize */
-			slave->offset = (mtd_div_by_eb(cur_offset, master) + 1) * master->erasesize;
+		tmp = cur_offset;
+		remainder = do_div(tmp, wr_alignment);
+		if (remainder) {
+			/* Round up to the next alignment boundary */
+			slave->offset += wr_alignment - remainder;
 			debug("Moving partition %d: "
 			       "0x%012llx -> 0x%012llx\n", partno,
 			       (unsigned long long)cur_offset, (unsigned long long)slave->offset);
@@ -731,19 +744,30 @@ static struct mtd_info *allocate_partition(struct mtd_info *master,
 		slave->erasesize = master->erasesize;
 	}
 
-	if ((slave->flags & MTD_WRITEABLE) &&
-	    mtd_mod_by_eb(slave->offset, slave)) {
-		/* Doesn't start on a boundary of major erase size */
+	/*
+	 * The erase size of the partition may differ from the one of the
+	 * master if the master exposes several erase regions. Align to the
+	 * one the partition ended up with, as long as there is one.
+	 */
+	if (!(slave->flags & MTD_NO_ERASE) && slave->erasesize)
+		wr_alignment = slave->erasesize;
+
+	tmp = slave->offset;
+	remainder = do_div(tmp, wr_alignment);
+	if ((slave->flags & MTD_WRITEABLE) && remainder) {
+		/* Doesn't start on a boundary of the alignment above */
 		/* FIXME: Let it be writable if it is on a boundary of
 		 * _minor_ erase size though */
 		slave->flags &= ~MTD_WRITEABLE;
-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n",
+		printk(KERN_WARNING"mtd: partition \"%s\" doesn't start on an erase/write block boundary -- force read-only\n",
 			part->name);
 	}
-	if ((slave->flags & MTD_WRITEABLE) &&
-	    mtd_mod_by_eb(slave->size, slave)) {
+
+	tmp = slave->size;
+	remainder = do_div(tmp, wr_alignment);
+	if ((slave->flags & MTD_WRITEABLE) && remainder) {
 		slave->flags &= ~MTD_WRITEABLE;
-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't end on an erase block -- force read-only\n",
+		printk(KERN_WARNING"mtd: partition \"%s\" doesn't end on an erase/write block -- force read-only\n",
 			part->name);
 	}
 
