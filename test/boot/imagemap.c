@@ -539,17 +539,22 @@ static int imagemap_test_mtd_blk(struct unit_test_state *uts)
 	 */
 	mtd_probe_devices();
 
-	/* Find the bound mtd_blk (a PART_TYPE_MTD block device) */
+	/*
+	 * Every MTD device of the test device tree binds an mtd_blk, so the
+	 * partition this test needs is what tells the SPI-NOR apart.
+	 */
 	for (uclass_find_first_device(UCLASS_BLK, &dev); dev;
 	     uclass_find_next_device(&dev)) {
 		desc = dev_get_uclass_plat(dev);
-		if (desc->part_type == PART_TYPE_MTD) {
+		if (desc->part_type != PART_TYPE_MTD || device_probe(dev))
+			continue;
+
+		if (part_get_info_by_name(desc, "nor-fit", &info) >= 1) {
 			blk = dev;
 			break;
 		}
 	}
 	ut_assertnonnull(blk);
-	ut_assertok(device_probe(blk));
 	desc = dev_get_uclass_plat(blk);
 
 	/* Write a known pattern into the "nor-fit" partition */
